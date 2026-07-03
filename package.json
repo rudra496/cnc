@@ -1,7 +1,37 @@
 {
-  "name": "nextjs_tailwind_shadcn_ts",
-  "version": "0.2.0",
+  "name": "cnc-simulator-pro",
+  "version": "1.0.0",
   "private": true,
+  "description": "Free, browser-based 3-axis CNC milling simulator with real-time G-code animation, 3D material removal, DRO control bar, feeds & speeds calculator, tool library, and 26 example programs. 100% client-side.",
+  "author": "Rudra Sarker (https://github.com/rudra496)",
+  "license": "MIT",
+  "homepage": "https://rudra496.github.io/cnc/",
+  "keywords": [
+    "cnc",
+    "cnc-simulator",
+    "g-code",
+    "gcode",
+    "cnc-milling",
+    "cnc-programming",
+    "m-code",
+    "three-js",
+    "react-three-fiber",
+    "nextjs",
+    "typescript",
+    "simulation",
+    "manufacturing",
+    "cad-cam",
+    "fanuc",
+    "machining",
+    "education"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rudra496/cnc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rudra496/cnc/issues"
+  },
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
     "build": "next build",

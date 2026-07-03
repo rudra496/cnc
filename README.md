@@ -1,8 +1,72 @@
+<div align="center">
+
+<img src="./public/og-image.svg" alt="CNC Simulator Pro — 3D CNC Milling & G-code Simulator" width="100%"/>
+
 # 🛠️ CNC Simulator Pro
 
-> A professional, browser-based **3-axis CNC milling simulator** with real-time G-code animation, a high-fidelity 3D machine, a powerful controller console, and a complete learning suite for G/M/T/F/S/Z codes.
+### Free, browser-based 3-axis CNC milling simulator with real-time G-code animation
 
-Built with **Next.js 16**, **react-three-fiber**, **Three.js**, **TypeScript**, **Tailwind CSS 4**, and **shadcn/ui**. 100% client-side — deploys to **GitHub Pages** as a static site.
+Run a real CNC machine in your browser — watch material get cut away in 3D as your G-code executes. No installs, no signups, no fees. **100% client-side.**
+
+[![Live Demo](https://img.shields.io/badge/🚀_LIVE_DEMO-Try_it_Now-22d3ee?style=for-the-badge)](https://rudra496.github.io/cnc/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22d3ee?style=for-the-badge)](./LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/rudra496/cnc?style=for-the-badge&color=22d3ee&label=⭐%20STARS)](https://github.com/rudra496/cnc/stargazers)
+[![Next.js](https://img.shields.io/badge/Next.js_16-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Three.js](https://img.shields.io/badge/Three.js-black?style=for-the-badge&logo=three.js&logoColor=white)](https://threejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+
+**[🌐 Live Demo](https://rudra496.github.io/cnc/)** · **[⭐ Star this repo](https://github.com/rudra496/cnc/stargazers)** · **[🐛 Report a Bug](https://github.com/rudra496/cnc/issues)** · **[💬 Discussions](https://github.com/rudra496/cnc/discussions)**
+
+</div>
+
+---
+
+> ⚡ **TL;DR** — CNC Simulator Pro is a professional-grade, **free and open-source** CNC milling simulator that runs entirely in your browser. It features a high-fidelity 3D machining center, real-time G-code visualization, a shop-style DRO control bar, a feeds & speeds calculator, and a complete learning suite for G-codes, M-codes, and tool management. Perfect for **students, machinists, hobbyists, educators, and anyone learning CNC programming.**
+
+Built with **Next.js 16**, **react-three-fiber**, **Three.js**, **TypeScript**, **Tailwind CSS 4**, and **shadcn/ui**. Deploys to **GitHub Pages** as a static site.
+
+---
+
+## 📑 Table of Contents
+
+- [Why CNC Simulator Pro?](#-why-cnc-simulator-pro)
+- [Features](#-features)
+- [Tool Library](#-tool-library-8-pre-configured-tools)
+- [Material Library](#-material-library-8-materials)
+- [Feeds & Speeds Calculator](#-feeds--speeds-calculator)
+- [Try It Now](#-try-it-now)
+- [Screenshots](#-screenshots)
+- [Deploy to GitHub Pages](#-deploy-to-github-pages)
+- [Local Development](#-local-development)
+- [Keyboard Shortcuts](#-keyboard-shortcuts)
+- [Project Structure](#-project-structure)
+- [Tech Stack](#-tech-stack)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [Community & Support](#-community--support)
+- [License](#-license)
+
+---
+
+## 💡 Why CNC Simulator Pro?
+
+Commercial CNC simulation software can cost **thousands of dollars** and requires powerful hardware. CNC Simulator Pro is built on the belief that **learning CNC should be free and accessible to everyone**, everywhere.
+
+| | CNC Simulator Pro | Commercial Software |
+|---|---|---|
+| **Price** | 💯 Free forever | 💸 $$$ |
+| **Install** | None — runs in browser | Heavy desktop app |
+| **Platform** | Any device with a browser | Windows/Linux only |
+| **Source code** | Open source (MIT) | Closed source |
+| **Real 3D machining** | ✅ Yes | ✅ Yes |
+| **G-code learning** | ✅ 65-code reference | Varies |
+
+**Who is it for?**
+- 🎓 **Students** learning CNC programming, manufacturing, or mechatronics
+- 👨‍🏫 **Educators** teaching machining, G-code, or CAM concepts
+- 🔧 **Machinists & engineers** prototyping and validating toolpaths
+- 🛠️ **Hobbyists & makers** exploring CNC before buying a machine
+- 💻 **Developers** studying real-time 3D simulation with Three.js
 
 ---
 
@@ -70,6 +134,24 @@ Pick a tool + material, adjust axial/radial/feed overrides, and get live:
 ### 📚 Comprehensive Learning
 - **Reference tab** — 65 CNC codes (G/M/T/F/S/Z) with descriptions, examples, and tips, fully searchable and category-filtered
 - **Guide tab** — how-to steps, G-code primer, coordinate system, programming tips, keyboard shortcuts
+
+---
+
+## 🚀 Try It Now
+
+<div align="center">
+
+### 👉 [**Open CNC Simulator Pro →**](https://rudra496.github.io/cnc/)
+
+No download, no account, no setup. Pick an example program and hit ▶️ Play.
+
+</div>
+
+---
+
+## 📸 Screenshots
+
+> _Screenshots coming soon — in the meantime, [try the live demo](https://rudra496.github.io/cnc/) to see the 3D machine, control bar, editor, and material removal in action._
 
 ---
 
@@ -183,10 +265,70 @@ src/
 
 ---
 
-## 📜 License
+## 🗺️ Roadmap
 
-MIT — free to use, modify, and share. Built for learning and experimentation.
+- [x] High-fidelity 3D gantry VMC with real material removal
+- [x] 26 example G-code programs (Beginner → Advanced)
+- [x] DRO control bar with Run / Dry Run / Machine Lock modes
+- [x] Feeds & speeds calculator
+- [x] Tool & material libraries
+- [x] 65-code G/M-code reference
+- [x] Save / load / export programs locally
+- [ ] 4th-axis (rotary) simulation
+- [ ] STL/STEP stock import
+- [ ] G-code export from CAM-style geometry
+- [ ] Lathe / turning simulation
+- [ ] Mobile-optimized touch controls
+
+> Have an idea? [Open a discussion](https://github.com/rudra496/cnc/discussions) or [request a feature](https://github.com/rudra496/cnc/issues/new?labels=enhancement&template=feature_request.md)!
 
 ---
 
-**Enjoy milling!** 🏭 If you find this useful, give it a ⭐ on GitHub.
+## 🤝 Contributing
+
+Contributions are welcome and appreciated! Whether it's a bug fix, a new example program, a tool definition, documentation, or a feature — every contribution makes CNC learning more accessible.
+
+1. **Fork** the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a **Pull Request**
+
+See [**CONTRIBUTING.md**](./CONTRIBUTING.md) for detailed guidelines, and please read our [**Code of Conduct**](./CODE_OF_CONDUCT.md).
+
+---
+
+## 💬 Community & Support
+
+<div align="center">
+
+[![GitHub Discussions](https://img.shields.io/badge/Discussions-Join_the_chat-22d3ee?style=for-the-badge&logo=github)](https://github.com/rudra496/cnc/discussions)
+[![Report Bug](https://img.shields.io/badge/Issue-Report_a_Bug-red?style=for-the-badge&logo=github)](https://github.com/rudra496/cnc/issues)
+[![Feature Request](https://img.shields.io/badge/Issue-Request_a_Feature-blue?style=for-the-badge&logo=github)](https://github.com/rudra496/cnc/issues)
+
+</div>
+
+- 🐛 Found a bug? [Open an issue](https://github.com/rudra496/cnc/issues/new?labels=bug&template=bug_report.md)
+- 💡 Have an idea? [Start a discussion](https://github.com/rudra496/cnc/discussions)
+- ⭐ Like the project? [Star the repo](https://github.com/rudra496/cnc/stargazers) — it helps others discover it!
+- 🔄 Share it with a machinist, student, or maker who'd love it.
+
+---
+
+## 📜 License
+
+Released under the **MIT License** — see [LICENSE](./LICENSE). Free to use, modify, and share. Built for learning and experimentation.
+
+---
+
+<div align="center">
+
+**Enjoy milling!** 🏭
+
+Made with ❤️ by [**Rudra Sarker**](https://github.com/rudra496)
+
+[🌐 Portfolio](https://rudra496.github.io/site) · [💻 GitHub](https://github.com/rudra496) · [💼 LinkedIn](https://www.linkedin.com/in/rudrasarker)
+
+If CNC Simulator Pro helped you learn or teach CNC, please consider **⭐ starring** this repository and **sharing** it. It makes a real difference.
+
+</div>

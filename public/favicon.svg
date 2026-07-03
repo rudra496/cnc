@@ -1,0 +1,24 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f1729"/>
+      <stop offset="100%" stop-color="#050810"/>
+    </linearGradient>
+    <linearGradient id="tool" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#bg)"/>
+  <rect width="64" height="64" rx="14" fill="none" stroke="#1e293b" stroke-width="1.5"/>
+  <!-- Gantry -->
+  <rect x="10" y="14" width="44" height="8" rx="3" fill="#334155"/>
+  <!-- Spindle -->
+  <rect x="26" y="22" width="12" height="12" rx="2" fill="#475569"/>
+  <!-- Quill -->
+  <rect x="29" y="34" width="6" height="12" fill="#64748b"/>
+  <!-- End mill tool -->
+  <polygon points="29,46 35,46 32,58" fill="url(#tool)"/>
+  <!-- Workpiece -->
+  <rect x="14" y="50" width="36" height="6" fill="#64748b"/>
+</svg>

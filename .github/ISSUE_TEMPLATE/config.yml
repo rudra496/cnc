@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Ask a Question / Start a Discussion
+    url: https://github.com/rudra496/cnc/discussions
+    about: Have a question, idea, or want to discuss CNC Simulator Pro? Start a discussion!
+  - name: 🚀 Live Demo
+    url: https://rudra496.github.io/cnc/
+    about: Try CNC Simulator Pro directly in your browser — no install needed.

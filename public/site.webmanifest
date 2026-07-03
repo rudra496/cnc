@@ -1,0 +1,20 @@
+{
+  "name": "CNC Simulator Pro — 3D CNC Milling & G-code Simulator",
+  "short_name": "CNC Simulator",
+  "description": "Free, browser-based 3-axis CNC milling simulator with real-time G-code animation, 3D material removal, DRO control bar, and a full G/M-code reference.",
+  "start_url": "/cnc/",
+  "scope": "/cnc/",
+  "display": "standalone",
+  "background_color": "#0a0e14",
+  "theme_color": "#22d3ee",
+  "orientation": "any",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/cnc/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

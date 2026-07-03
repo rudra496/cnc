@@ -1,0 +1,101 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e14"/>
+      <stop offset="50%" stop-color="#0f1729"/>
+      <stop offset="100%" stop-color="#050810"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <linearGradient id="amber" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <rect width="1280" height="640" fill="url(#glow)"/>
+
+  <!-- Stylized CNC machine icon (right side) -->
+  <g transform="translate(820, 120)" opacity="0.95">
+    <!-- Machine column -->
+    <rect x="0" y="40" width="280" height="360" rx="8" fill="#1e293b" stroke="#334155" stroke-width="2"/>
+    <!-- Gantry bridge -->
+    <rect x="-20" y="60" width="320" height="44" rx="6" fill="#334155"/>
+    <!-- Spindle motor -->
+    <rect x="100" y="104" width="80" height="60" rx="6" fill="#475569"/>
+    <circle cx="140" cy="134" r="14" fill="#64748b"/>
+    <!-- Quill / Z axis -->
+    <rect x="128" y="164" width="24" height="120" fill="#64748b"/>
+    <!-- Tool (end mill) -->
+    <polygon points="128,284 152,284 140,360" fill="url(#accent)"/>
+    <!-- Workpiece being milled -->
+    <rect x="60" y="370" width="160" height="40" fill="#64748b" stroke="#94a3b8" stroke-width="1"/>
+    <!-- T-slot table -->
+    <rect x="20" y="410" width="240" height="20" fill="#475569"/>
+    <!-- Toolpath traces (cyan feed + amber rapid) -->
+    <polyline points="140,360 200,360 200,330 90,330 90,360 140,360" fill="none" stroke="url(#accent)" stroke-width="2" stroke-dasharray="0" opacity="0.6"/>
+    <line x1="140" y1="164" x2="140" y2="360" stroke="url(#amber)" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.5"/>
+    <!-- Chips/particles -->
+    <circle cx="210" cy="355" r="2" fill="#fbbf24"/>
+    <circle cx="195" cy="345" r="1.5" fill="#fbbf24"/>
+    <circle cx="225" cy="350" r="1.5" fill="#fbbf24"/>
+  </g>
+
+  <!-- Glow orbs -->
+  <circle cx="200" cy="200" r="180" fill="#22d3ee" opacity="0.05"/>
+  <circle cx="1100" cy="540" r="220" fill="#0ea5e9" opacity="0.04"/>
+
+  <!-- Badge -->
+  <g transform="translate(90, 90)">
+    <rect x="0" y="0" width="230" height="40" rx="20" fill="#22d3ee" fill-opacity="0.12" stroke="#22d3ee" stroke-width="1"/>
+    <circle cx="22" cy="20" r="5" fill="#22d3ee">
+      <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <text x="38" y="26" font-family="'Segoe UI', system-ui, sans-serif" font-size="15" font-weight="600" fill="#67e8f9">FREE &amp; OPEN SOURCE</text>
+  </g>
+
+  <!-- Title -->
+  <text x="90" y="240" font-family="'Segoe UI', system-ui, sans-serif" font-size="78" font-weight="800" fill="#f8fafc">CNC Simulator</text>
+  <text x="90" y="320" font-family="'Segoe UI', system-ui, sans-serif" font-size="78" font-weight="800" fill="url(#accent)">Pro</text>
+
+  <!-- Tagline -->
+  <text x="92" y="380" font-family="'Segoe UI', system-ui, sans-serif" font-size="28" font-weight="500" fill="#94a3b8">3-Axis CNC Milling &amp; G-code Simulator</text>
+  <text x="92" y="420" font-family="'Segoe UI', system-ui, sans-serif" font-size="28" font-weight="500" fill="#94a3b8">in your browser — no install needed</text>
+
+  <!-- Feature pills -->
+  <g transform="translate(90, 470)" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="600">
+    <g>
+      <rect x="0" y="0" width="150" height="36" rx="18" fill="#1e293b" stroke="#334155"/>
+      <text x="75" y="23" fill="#67e8f9" text-anchor="middle">Real-time 3D</text>
+    </g>
+    <g transform="translate(166, 0)">
+      <rect x="0" y="0" width="130" height="36" rx="18" fill="#1e293b" stroke="#334155"/>
+      <text x="65" y="23" fill="#67e8f9" text-anchor="middle">G / M Code</text>
+    </g>
+    <g transform="translate(312, 0)">
+      <rect x="0" y="0" width="170" height="36" rx="18" fill="#1e293b" stroke="#334155"/>
+      <text x="85" y="23" fill="#67e8f9" text-anchor="middle">Material Removal</text>
+    </g>
+    <g transform="translate(498, 0)">
+      <rect x="0" y="0" width="150" height="36" rx="18" fill="#1e293b" stroke="#334155"/>
+      <text x="75" y="23" fill="#67e8f9" text-anchor="middle">26 Examples</text>
+    </g>
+  </g>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="600" width="1280" height="40" fill="#050810"/>
+  <text x="90" y="626" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="500" fill="#64748b">Next.js • Three.js • react-three-fiber • TypeScript • 100% client-side</text>
+  <text x="1190" y="626" font-family="'Segoe UI', system-ui, sans-serif" font-size="16" font-weight="600" fill="#475569" text-anchor="end">github.com/rudra496/cnc</text>
+</svg>
