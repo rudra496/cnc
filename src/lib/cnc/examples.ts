@@ -60,7 +60,7 @@ export const CNC_EXAMPLES: CncExample[] = [
       "define a circle. Two depth passes clean up the bottom.",
     difficulty: "Beginner",
     machine: "Mill",
-    workpiece: { width: 80, depth: 80, height: 10 },
+    workpiece: { width: 120, depth: 120, height: 20 },
     code: `
 ;
 ; ============================================================

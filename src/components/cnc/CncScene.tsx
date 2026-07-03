@@ -150,7 +150,7 @@ function Workpiece() {
         castShadow
         receiveShadow
       >
-        <Edges threshold={15} color="#5b626b" />
+        <Edges threshold={5} color="#a0aec0" />
       </mesh>
       <mesh geometry={top.geometry} material={topMat} receiveShadow castShadow />
     </group>
@@ -629,8 +629,9 @@ function SceneContents() {
       <ambientLight intensity={0.5} />
       <directionalLight
         position={[140, 220, 140]}
-        intensity={1.7}
+        intensity={2.0}
         castShadow
+        shadow-bias={-0.0005}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-camera-left={-240}
@@ -682,8 +683,8 @@ function SceneContents() {
       <OrbitControls
         makeDefault
         target={[0, 0, 0]}
-        minDistance={90}
-        maxDistance={560}
+        minDistance={20}
+        maxDistance={800}
         maxPolarAngle={Math.PI / 2.05}
         enableDamping
         dampingFactor={0.08}
@@ -697,8 +698,8 @@ export default function CncScene() {
   return (
     <Canvas
       shadows
-      dpr={[1, 2]}
-      camera={{ position: [230, 190, 250], fov: 38, near: 1, far: 2000 }}
+      dpr={[1, 3]}
+      camera={{ position: [230, 190, 250], fov: 38, near: 1, far: 3000 }}
       gl={{ antialias: true, preserveDrawingBuffer: true }}
       style={{ width: "100%", height: "100%", background: "transparent" }}
     >
