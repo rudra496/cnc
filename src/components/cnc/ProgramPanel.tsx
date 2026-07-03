@@ -58,8 +58,8 @@ export default function ProgramPanel() {
   return (
     <div className="flex h-full flex-col bg-[#0b0d10]">
       {/* program meta header */}
-      <div className="border-b border-white/10 p-3">
-        <div className="mb-2 flex items-center gap-2">
+      <div className="border-b border-white/10 p-2">
+        <div className="mb-1.5 flex items-center gap-2">
           <Select value={exampleId ?? "custom"} onValueChange={(v) => {
             if (v === "custom") {
               setSource("; Type your custom G-code here\n");
@@ -109,7 +109,7 @@ export default function ProgramPanel() {
         )}
 
         {/* stats row */}
-        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+        <div className="grid grid-cols-2 gap-1 text-[9px] mt-1.5">
           <Stat
             icon={Ruler}
             label="Stock"
@@ -137,7 +137,7 @@ export default function ProgramPanel() {
         </div>
 
         {/* diagnostics */}
-        <div className="mt-2">
+        <div className="mt-1.5">
           {parseErrors.length > 0 ? (
             <DiagList
               kind="error"

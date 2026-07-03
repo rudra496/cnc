@@ -115,7 +115,7 @@ export default function Home() {
         <PanelGroup direction={direction} key={direction} autoSaveId="cnc-main">
           {/* 3D viewport */}
           <Panel
-            defaultSize={isMobile ? 50 : 62}
+            defaultSize={isMobile ? 50 : 55}
             minSize={isMobile ? 25 : 40}
             maxSize={isMobile ? 75 : 80}
           >
@@ -135,8 +135,8 @@ export default function Home() {
 
           {/* Right panel: tabs */}
           <Panel
-            defaultSize={isMobile ? 50 : 38}
-            minSize={isMobile ? 25 : 28}
+            defaultSize={isMobile ? 50 : 45}
+            minSize={isMobile ? 25 : 30}
             maxSize={isMobile ? 75 : 60}
           >
             <Tabs defaultValue="program" className="flex h-full flex-col">
@@ -144,45 +144,45 @@ export default function Home() {
                 <TabsList className="h-auto flex-wrap bg-transparent p-0 gap-1">
                   <TabsTrigger
                     value="program"
-                    className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
+                    className="h-7 rounded-md px-2.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-slate-100 data-[state=active]:bg-white/10 data-[state=active]:text-white"
                   >
-                    <Terminal className="mr-1 h-3 w-3" /> Program
+                    <Terminal className="mr-1 h-3 w-3 text-cyan-400" /> Program
                   </TabsTrigger>
                   <TabsTrigger
                     value="library"
-                    className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
+                    className="h-7 rounded-md px-2.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-slate-100 data-[state=active]:bg-white/10 data-[state=active]:text-white"
                   >
-                    <FolderOpen className="mr-1 h-3 w-3" /> Library
+                    <FolderOpen className="mr-1 h-3 w-3 text-amber-400" /> Library
                   </TabsTrigger>
                   <TabsTrigger
                     value="tools"
-                    className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
+                    className="h-7 rounded-md px-2.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-slate-100 data-[state=active]:bg-white/10 data-[state=active]:text-white"
                   >
-                    <Wrench className="mr-1 h-3 w-3" /> Tools
+                    <Wrench className="mr-1 h-3 w-3 text-purple-400" /> Tools
                   </TabsTrigger>
                   <TabsTrigger
                     value="materials"
-                    className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
+                    className="h-7 rounded-md px-2.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-slate-100 data-[state=active]:bg-white/10 data-[state=active]:text-white"
                   >
-                    <Layers className="mr-1 h-3 w-3" /> Material
+                    <Layers className="mr-1 h-3 w-3 text-emerald-400" /> Material
                   </TabsTrigger>
                   <TabsTrigger
                     value="feeds"
-                    className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
+                    className="h-7 rounded-md px-2.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-slate-100 data-[state=active]:bg-white/10 data-[state=active]:text-white"
                   >
-                    <Calculator className="mr-1 h-3 w-3" /> Feeds
+                    <Calculator className="mr-1 h-3 w-3 text-pink-400" /> Feeds
                   </TabsTrigger>
                   <TabsTrigger
                     value="reference"
-                    className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
+                    className="h-7 rounded-md px-2.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-slate-100 data-[state=active]:bg-white/10 data-[state=active]:text-white"
                   >
-                    <BookOpen className="mr-1 h-3 w-3" /> Reference
+                    <BookOpen className="mr-1 h-3 w-3 text-blue-400" /> Reference
                   </TabsTrigger>
                   <TabsTrigger
                     value="guide"
-                    className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
+                    className="h-7 rounded-md px-2.5 text-[11px] text-slate-300 hover:bg-white/5 hover:text-slate-100 data-[state=active]:bg-white/10 data-[state=active]:text-white"
                   >
-                    <GraduationCap className="mr-1 h-3 w-3" /> Guide
+                    <GraduationCap className="mr-1 h-3 w-3 text-rose-400" /> Guide
                   </TabsTrigger>
                 </TabsList>
               </div>
