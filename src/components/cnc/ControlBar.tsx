@@ -56,7 +56,7 @@ function DRO() {
     { label: "Z", v: pos.z, color: "#4ade80" },
   ];
   return (
-    <div className="flex gap-1.5">
+    <div className="flex flex-col gap-1.5 w-full">
       {axes.map((a) => (
         <div
           key={a.label}
@@ -143,7 +143,7 @@ function StatusRow() {
   const rpmDisp = Math.round((spindleRpm * spindleOverride) / 100);
 
   return (
-    <div className="flex flex-wrap items-center gap-1.5">
+    <div className="grid grid-cols-2 gap-1.5">
       <StatusLamp
         icon={spindleDir >= 0 ? CircleDot : RotateCcw}
         label="Spindle"
@@ -236,7 +236,7 @@ function OverrideKnob({
   unit?: string;
 }) {
   return (
-    <div className="flex w-[110px] flex-col gap-0.5">
+    <div className="flex w-full flex-col gap-0.5">
       <div className="flex items-center justify-between">
         <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
           {label}
@@ -388,213 +388,146 @@ export default function ControlBar() {
 
   return (
     <TooltipProvider delayDuration={250}>
-      <div className="border-t border-white/10 bg-gradient-to-b from-[#15181d] to-[#0d0f13] shadow-[0_-8px_24px_rgba(0,0,0,0.4)]">
-        {/* Top strip: DRO + status */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
-          <div className="flex items-center gap-3">
-            <DRO />
-            <div className="hidden flex-col rounded-md border border-white/10 bg-black/50 px-2.5 py-1.5 sm:flex">
-              <span className="text-[8px] uppercase tracking-wider text-slate-500">
-                Block
-              </span>
-              <span className="font-mono text-sm font-semibold tabular-nums text-slate-200">
-                {Math.min(currentMoveIndex + 1, totalMoves || 1)}
-                <span className="text-slate-500"> / {totalMoves}</span>
-              </span>
-            </div>
-            <div className="hidden flex-col rounded-md border border-white/10 bg-black/50 px-2.5 py-1.5 md:flex">
-              <span className="text-[8px] uppercase tracking-wider text-slate-500">
-                Cycle Time
-              </span>
-              <span className="font-mono text-sm font-semibold tabular-nums text-slate-200">
-                {fmtTime(elapsedTimeSec)}
-                <span className="text-slate-500"> / {fmtTime(cycleTimeSec)}</span>
-              </span>
-            </div>
+      <div className="flex h-full flex-col gap-4 p-4">
+        {/* DRO */}
+        <DRO />
+
+        <div className="h-px w-full bg-white/10 shrink-0" />
+
+        {/* Status */}
+        <StatusRow />
+
+        <div className="h-px w-full bg-white/10 shrink-0" />
+
+        {/* Timeline & Scrubber */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between text-[9px] uppercase tracking-wider text-slate-500">
+            <span>Timeline</span>
+            <span className="font-mono tabular-nums text-slate-400">
+              {(progress * 100).toFixed(1)}%
+            </span>
           </div>
-          <StatusRow />
+          <Slider
+            value={[Math.round(progress * 1000)]}
+            min={0}
+            max={1000}
+            step={1}
+            onValueChange={(v) => seek(v[0] / 1000)}
+            className="py-1"
+          />
+          <div className="flex items-center justify-between font-mono text-[9px] tabular-nums text-slate-500">
+            <span>{fmtTime(elapsedTimeSec)}</span>
+            <span>-{fmtTime(Math.max(0, cycleTimeSec - elapsedTimeSec))}</span>
+          </div>
         </div>
 
-        {/* Bottom strip: transport + scrubber + speed + overrides */}
-        <div className="flex flex-wrap items-center gap-3 border-t border-white/5 px-3 py-2.5">
-          {/* Transport */}
-          <div className="flex items-center gap-1.5">
-            <TButton onClick={reset} tooltip="Reset (R)">
-              <RotateCcw className="h-4 w-4" />
-            </TButton>
-            <TButton onClick={stepBackward} tooltip="Step back (←)">
-              <SkipBack className="h-4 w-4" />
-            </TButton>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  onClick={toggle}
-                  size="icon"
-                  className={cn(
-                    "h-12 w-12 rounded-full border-2 transition-all",
-                    playing
-                      ? "border-amber-400/60 bg-amber-500/20 text-amber-300 shadow-[0_0_18px_rgba(245,158,11,0.45)]"
-                      : "border-cyan-400/60 bg-cyan-500/20 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.4)] hover:bg-cyan-500/30",
-                  )}
-                >
-                  {playing ? (
-                    <Pause className="h-5 w-5" />
-                  ) : (
-                    <Play className="h-5 w-5 translate-x-0.5" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top" className="text-xs">
-                {playing ? "Pause (Space)" : "Play (Space)"}
-              </TooltipContent>
-            </Tooltip>
-            <TButton onClick={stepForward} tooltip="Step forward (→)">
-              <SkipForward className="h-4 w-4" />
-            </TButton>
-            <TButton
-              onClick={toggleSingleBlock}
-              tooltip="Single-block mode"
-              active={singleBlock}
-            >
-              <Footprints className="h-4 w-4" />
-            </TButton>
-          </div>
-
-          {/* Machine modes */}
-          <div className="hidden items-center gap-1.5 lg:flex">
-            <TButton
-              onClick={toggleOptionalStop}
-              tooltip="Optional stop (M01)"
-              active={optionalStop}
-            >
+        <div className="h-px w-full bg-white/10 shrink-0" />
+        
+        {/* Machine modes */}
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-1.5">
+            <TButton onClick={toggleOptionalStop} tooltip="Optional stop (M01)" active={optionalStop}>
               <PauseCircle className="h-4 w-4" />
             </TButton>
-            <TButton
-              onClick={toggleBlockSkip}
-              tooltip="Block skip (/)"
-              active={blockSkip}
-            >
+            <TButton onClick={toggleBlockSkip} tooltip="Block skip (/)" active={blockSkip}>
               <OctagonX className="h-4 w-4" />
             </TButton>
-            <ModeSelect
-              mode={machineMode}
-              onChange={setMachineMode}
-            />
-          </div>
-
-          <div className="hidden h-10 w-px bg-white/10 md:block" />
-
-          {/* Scrubber */}
-          <div className="flex min-w-[180px] flex-1 flex-col gap-1">
-            <div className="flex items-center justify-between text-[9px] uppercase tracking-wider text-slate-500">
-              <span>Timeline</span>
-              <span className="font-mono tabular-nums text-slate-400">
-                {(progress * 100).toFixed(1)}%
-              </span>
-            </div>
-            <Slider
-              value={[Math.round(progress * 1000)]}
-              min={0}
-              max={1000}
-              step={1}
-              onValueChange={(v) => seek(v[0] / 1000)}
-              className="py-1"
-            />
-            <div className="flex items-center justify-between font-mono text-[9px] tabular-nums text-slate-500">
-              <span>{fmtTime(elapsedTimeSec)}</span>
-              <span>-{fmtTime(Math.max(0, cycleTimeSec - elapsedTimeSec))}</span>
+            <div className="ml-auto">
+              <ModeSelect mode={machineMode} onChange={setMachineMode} />
             </div>
           </div>
+        </div>
 
-          <div className="hidden h-10 w-px bg-white/10 lg:block" />
+        {/* Transport */}
+        <div className="flex items-center justify-center gap-2 py-2">
+          <TButton onClick={stepBackward} tooltip="Step back (←)">
+            <SkipBack className="h-4 w-4" />
+          </TButton>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={toggle}
+                size="icon"
+                className={cn(
+                  "h-12 w-12 shrink-0 rounded-full border-2 transition-all",
+                  playing
+                    ? "border-amber-400/60 bg-amber-500/20 text-amber-300 shadow-[0_0_18px_rgba(245,158,11,0.45)]"
+                    : "border-cyan-400/60 bg-cyan-500/20 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.4)] hover:bg-cyan-500/30",
+                )}
+              >
+                {playing ? (
+                  <Pause className="h-5 w-5" />
+                ) : (
+                  <Play className="h-5 w-5 translate-x-0.5" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="text-xs">
+              {playing ? "Pause (Space)" : "Play (Space)"}
+            </TooltipContent>
+          </Tooltip>
+          <TButton onClick={stepForward} tooltip="Step forward (→)">
+            <SkipForward className="h-4 w-4" />
+          </TButton>
+        </div>
+        <div className="flex items-center justify-center gap-4">
+          <TButton onClick={reset} tooltip="Reset (R)">
+            <RotateCcw className="h-4 w-4" />
+          </TButton>
+          <TButton onClick={toggleSingleBlock} tooltip="Single-block mode" active={singleBlock}>
+            <Footprints className="h-4 w-4" />
+          </TButton>
+        </div>
 
-          {/* Cycle speed presets */}
-          <div className="flex flex-col gap-1">
-            <div className="flex items-center gap-1.5">
-              <FastForward className="h-3 w-3 text-slate-500" />
-              <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
-                Cycle Speed
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              {speedPresets.map((sp) => (
-                <button
-                  key={sp}
-                  onClick={() => setSpeed(sp)}
-                  className={cn(
-                    "rounded-md border px-2 py-1 font-mono text-[11px] font-semibold tabular-nums transition-colors",
-                    speed === sp
-                      ? "border-cyan-400/60 bg-cyan-500/25 text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,0.3)]"
-                      : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200",
-                  )}
-                >
-                  {sp}×
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="h-px w-full bg-white/10 shrink-0" />
 
-          <div className="hidden h-10 w-px bg-white/10 xl:block" />
-
-          {/* Overrides */}
-          <div className="hidden items-center gap-3 xl:flex">
-            <OverrideKnob
-              label="Feed"
-              value={feedOverride}
-              onChange={setFeedOverride}
-              min={0}
-              max={200}
-              color="#22d3ee"
-            />
-            <OverrideKnob
-              label="Rapid"
-              value={rapidOverride}
-              onChange={setRapidOverride}
-              min={10}
-              max={100}
-              color="#f59e0b"
-            />
-            <OverrideKnob
-              label="Spindle"
-              value={spindleOverride}
-              onChange={setSpindleOverride}
-              min={50}
-              max={200}
-              color="#fb7185"
-            />
-          </div>
-
-          <div className="hidden h-10 w-px bg-white/10 lg:block" />
-
-          {/* Settings/extra */}
-          <div className="hidden items-center gap-1.5 lg:flex">
-            <TButton
-              onClick={() => setSpeed(Math.max(0.1, speed - 0.25))}
-              tooltip="Slower"
-              size="sm"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </TButton>
-            <span className="w-12 text-center font-mono text-xs font-semibold text-slate-300">
-              {speed}×
+        {/* Cycle speed presets */}
+        <div className="flex flex-col gap-2 shrink-0">
+          <div className="flex items-center gap-1.5">
+            <FastForward className="h-3 w-3 text-slate-500" />
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+              Cycle Speed
             </span>
-            <TButton
-              onClick={() => setSpeed(speed + 0.25)}
-              tooltip="Faster"
-              size="sm"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </TButton>
-            <TButton
-              onClick={() => setSpeed(1)}
-              tooltip="Reset speed to 1×"
-              size="sm"
-            >
-              <Settings2 className="h-3.5 w-3.5" />
-            </TButton>
-            <TButton onClick={reset} tooltip="Stop & reset" size="sm">
-              <Square className="h-3.5 w-3.5" />
-            </TButton>
+          </div>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {speedPresets.map((sp) => (
+              <button
+                key={sp}
+                onClick={() => setSpeed(sp)}
+                className={cn(
+                  "flex-1 rounded-md border px-1 py-1 font-mono text-[11px] font-semibold tabular-nums transition-colors",
+                  speed === sp
+                    ? "border-cyan-400/60 bg-cyan-500/25 text-cyan-200 shadow-[0_0_10px_rgba(34,211,238,0.3)]"
+                    : "border-white/10 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200",
+                )}
+              >
+                {sp}×
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="h-px w-full bg-white/10 shrink-0" />
+
+        {/* Overrides */}
+        <div className="flex flex-col gap-3 shrink-0">
+          <OverrideKnob label="Feed" value={feedOverride} onChange={setFeedOverride} min={0} max={200} color="#22d3ee" />
+          <OverrideKnob label="Rapid" value={rapidOverride} onChange={setRapidOverride} min={10} max={100} color="#f59e0b" />
+          <OverrideKnob label="Spindle" value={spindleOverride} onChange={setSpindleOverride} min={50} max={200} color="#fb7185" />
+        </div>
+
+        <div className="mt-auto flex flex-col gap-1.5 rounded-md border border-white/10 bg-black/50 px-2.5 py-1.5 shrink-0">
+          <div className="flex justify-between items-center">
+            <span className="text-[8px] uppercase tracking-wider text-slate-500">Block</span>
+            <span className="font-mono text-xs font-semibold tabular-nums text-slate-200">
+              {Math.min(currentMoveIndex + 1, totalMoves || 1)}<span className="text-slate-500"> / {totalMoves}</span>
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[8px] uppercase tracking-wider text-slate-500">Cycle Time</span>
+            <span className="font-mono text-xs font-semibold tabular-nums text-slate-200">
+              {fmtTime(elapsedTimeSec)}<span className="text-slate-500"> / {fmtTime(cycleTimeSec)}</span>
+            </span>
           </div>
         </div>
       </div>

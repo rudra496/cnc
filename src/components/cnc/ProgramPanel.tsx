@@ -37,6 +37,7 @@ export default function ProgramPanel() {
   const parseWarnings = useSimStore((s) => s.parseWarnings);
   const cycleTimeSec = useSimStore((s) => s.cycleTimeSec);
   const parseResult = useSimStore((s) => s.parseResult);
+  const setSource = useSimStore((s) => s.setSource);
 
   const currentExample = useMemo(
     () => CNC_EXAMPLES.find((e) => e.id === exampleId),
@@ -59,7 +60,13 @@ export default function ProgramPanel() {
       {/* program meta header */}
       <div className="border-b border-white/10 p-3">
         <div className="mb-2 flex items-center gap-2">
-          <Select value={exampleId ?? "custom"} onValueChange={(v) => v !== "custom" && loadExample(v)}>
+          <Select value={exampleId ?? "custom"} onValueChange={(v) => {
+            if (v === "custom") {
+              setSource("; Type your custom G-code here\n");
+            } else {
+              loadExample(v);
+            }
+          }}>
             <SelectTrigger className="h-8 flex-1 border-white/10 bg-black/40 text-xs text-slate-200">
               <SelectValue placeholder="Select a program" />
             </SelectTrigger>

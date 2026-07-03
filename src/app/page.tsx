@@ -106,7 +106,12 @@ export default function Home() {
       </header>
 
       {/* Main split */}
-      <div className="min-h-0 flex-1">
+      <div className="min-h-0 flex-1 flex flex-row overflow-hidden">
+        {/* Left Sidebar Control bar */}
+        <div className="w-64 shrink-0 border-r border-white/10 bg-gradient-to-b from-[#15181d] to-[#0d0f13] overflow-y-auto [scrollbar-width:thin]">
+          <ControlBar />
+        </div>
+
         <PanelGroup direction={direction} key={direction} autoSaveId="cnc-main">
           {/* 3D viewport */}
           <Panel
@@ -135,8 +140,8 @@ export default function Home() {
             maxSize={isMobile ? 75 : 60}
           >
             <Tabs defaultValue="program" className="flex h-full flex-col">
-              <div className="flex items-center gap-1 overflow-x-auto border-b border-white/10 bg-[#0d0f13] px-2 py-1.5 [scrollbar-width:none]">
-                <TabsList className="h-8 bg-transparent p-0">
+              <div className="flex flex-wrap items-center gap-1 border-b border-white/10 bg-[#0d0f13] px-2 py-1.5">
+                <TabsList className="h-auto flex-wrap bg-transparent p-0 gap-1">
                   <TabsTrigger
                     value="program"
                     className="h-7 rounded-md px-2.5 text-[11px] data-[state=active]:bg-white/10 data-[state=active]:text-cyan-200"
@@ -206,9 +211,6 @@ export default function Home() {
           </Panel>
         </PanelGroup>
       </div>
-
-      {/* Control bar */}
-      <ControlBar />
 
       {/* Footer */}
       <footer className="flex shrink-0 items-center justify-between border-t border-white/10 bg-[#0d0f13] px-4 py-1 text-[10px] text-slate-600">
