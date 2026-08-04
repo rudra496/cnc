@@ -1,0 +1,78 @@
+name: Dependabot Autopilot
+
+# Single source of truth for Dependabot triage. For every open bot PR:
+#   1. approve it
+#   2. if a real CI/deployment check FAILED      -> close it (Dependabot regenerates)
+#   3. if checks are still running               -> enable auto-merge (fires when green)
+#   4. if all checks passed                      -> squash-merge immediately
+# Housekeeping checks (welcome) and rate-limited deploys ("retry in 24h") are
+# treated as transient and never trigger a close.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  check_run:
+    types: [completed]
+  schedule:
+    - cron: '23 */2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
+concurrency:
+  group: dep-autopilot
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    if: github.repository_owner == 'rudra496'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Triage bot pull requests
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+          echo "::group::Dependabot Autopilot — $REPO"
+          mapfile -t PRS < <(gh pr list --repo "$REPO" --state open --json number,author \
+            --jq '.[] | select((.author.login // "") | test("dependabot|github-actions")) | .number')
+          echo "Open bot PRs: ${#PRS[@]}"
+          for num in "${PRS[@]}"; do
+            echo "--- PR #$num ---"
+            sha=$(gh pr view "$num" --repo "$REPO" --json headRefOid --jq '.headRefOid')
+            # 1) approve (no-op if not required / already approved)
+            gh pr review "$num" --repo "$REPO" --approve --body "🤖 Approved by Dependabot Autopilot." 2>/dev/null || true
+
+            fails=$( { \
+              gh api "repos/$REPO/commits/$sha/check-runs?per_page=100" \
+                --jq '.check_runs[] | select(.status=="completed") | select(.conclusion=="failure" or .conclusion=="cancelled" or .conclusion=="timed_out") | "\(.name)\t\(.output.title // "")"' ; \
+              gh api "repos/$REPO/commits/$sha/status" \
+                --jq '.statuses[] | select(.state=="failure" or .state=="error") | "\(.context)\t\(.description // "")"' ; \
+              } 2>/dev/null | grep -viE 'welcome' | grep -viE 'rate[ -]?limit|retry in' || true )
+            pending=$(gh api "repos/$REPO/commits/$sha/check-runs?per_page=100" \
+              --jq '.check_runs[] | select(.status!="completed") | .name' 2>/dev/null | grep -viE 'welcome' || true )
+
+            if [ -n "$fails" ]; then
+              echo "PR #$num: FAILURE(S):"; echo "$fails" | sed 's/^/    /'
+              gh pr close "$num" --repo "$REPO" --delete-branch \
+                --comment "🤖 **Dependabot Autopilot**: closing — a CI/deployment check failed. Dependabot will regenerate this and it will be re-tried automatically." 2>&1 | sed 's/^/    /' || true
+              echo "PR #$num: CLOSED."
+              continue
+            fi
+            if [ -n "$pending" ]; then
+              echo "PR #$num: checks pending — enabling auto-merge."
+              gh pr merge "$num" --repo "$REPO" --squash --delete-branch --auto 2>/dev/null || true
+              continue
+            fi
+            echo "PR #$num: checks green — merging."
+            gh pr merge "$num" --repo "$REPO" --squash --delete-branch --auto 2>/dev/null \
+              || gh pr merge "$num" --repo "$REPO" --squash --delete-branch 2>/dev/null \
+              || echo "PR #$num: merge not actionable yet — will retry next run."
+          done
+          echo "::endgroup::"
