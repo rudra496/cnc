@@ -165,7 +165,7 @@ export function parseGCode(source: string): ParseResult {
     if (type === "rapid" || type === "linear") {
       length = Math.hypot(to.x - pos.x, to.y - pos.y, to.z - pos.z);
     } else if (type === "arc_cw" || type === "arc_ccw") {
-      const sweep = (extra as { sweep?: number }).sweep ?? 0;
+      const sweep = extra?.sweep ?? 0;
       length = (extra?.radius ?? 0) * sweep;
     } else {
       length = 0;
@@ -509,10 +509,9 @@ export function sampleMove(move: Move, t: number): Vec3 {
     };
   }
   if (move.type === "arc_cw" || move.type === "arc_ccw") {
-    const ext = move as Move & { sweep?: number; startAngle?: number; plane?: string };
-    const sweep = ext.sweep ?? 0;
-    const startAngle = ext.startAngle ?? 0;
-    const plane = ext.plane ?? "XY";
+    const sweep = move.sweep ?? 0;
+    const startAngle = move.startAngle ?? 0;
+    const plane = move.plane ?? "XY";
     const cw = move.type === "arc_cw";
     const angle = cw ? startAngle - sweep * t : startAngle + sweep * t;
     const cx = move.center!.x;
