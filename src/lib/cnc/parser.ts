@@ -381,23 +381,46 @@ export function parseGCode(source: string): ParseResult {
     const ty = resolveAxis(pos.y, y);
     const tz = resolveAxis(pos.z, z);
 
-    // Canned cycle (G81/82/83) handling — simplified: drill at each XY, then retract to R
+    // Canned cycle (G81/82/83) handling — more accurate standard simulation
     if (cannedCycle !== null && (x !== undefined || y !== undefined || z !== undefined)) {
       const rPlane = r !== undefined ? toMm(r) : cannedZ ?? 5;
       const depth = z !== undefined ? tz : cannedDepth ?? pos.z;
       cannedZ = rPlane;
       cannedDepth = depth;
       cannedFeed = feed;
-      // 1) rapid to R plane above the hole (at current XY first if XY given, move then plunge)
+      
+      // 1) rapid to R plane above the hole
       if (x !== undefined || y !== undefined) {
         pushMove("rapid", { x: tx, y: ty, z: rPlane }, lineNo, raw, tok.comment);
       } else {
         pushMove("rapid", { x: pos.x, y: pos.y, z: rPlane }, lineNo, raw, tok.comment);
       }
-      // 2) feed plunge to depth
-      pushMove("linear", { x: tx, y: ty, z: depth }, lineNo, raw, tok.comment);
-      // 3) rapid retract to R plane (G99) or initial (G98) — use R plane for simplicity
-      pushMove("rapid", { x: tx, y: ty, z: rPlane }, lineNo, raw, tok.comment);
+      
+      if (cannedCycle === 83) {
+        // G83 Peck drilling
+        const peck = q !== undefined ? toMm(q) : 5; // Default peck depth if Q is missing
+        let currentZ = rPlane;
+        while (currentZ > depth) {
+          currentZ -= peck;
+          if (currentZ < depth) currentZ = depth;
+          pushMove("linear", { x: tx, y: ty, z: currentZ }, lineNo, raw, tok.comment);
+          // Retract to R plane
+          pushMove("rapid", { x: tx, y: ty, z: rPlane }, lineNo, raw, tok.comment);
+          // Rapid back to just above the previous cut
+          if (currentZ > depth) {
+            pushMove("rapid", { x: tx, y: ty, z: currentZ + 1 }, lineNo, raw, tok.comment);
+          }
+        }
+      } else {
+        // 2) feed plunge to depth
+        pushMove("linear", { x: tx, y: ty, z: depth }, lineNo, raw, tok.comment);
+        // G82 Dwell at bottom
+        if (cannedCycle === 82 && p !== undefined) {
+          pushMove("dwell", { x: tx, y: ty, z: depth }, lineNo, raw, tok.comment, { dwell: p });
+        }
+        // 3) rapid retract to R plane
+        pushMove("rapid", { x: tx, y: ty, z: rPlane }, lineNo, raw, tok.comment);
+      }
       continue;
     }
 
@@ -413,23 +436,29 @@ export function parseGCode(source: string): ParseResult {
       pushMove(type, { x: tx, y: ty, z: tz }, lineNo, raw, tok.comment);
     } else if (useMotion === 2 || useMotion === 3) {
       const cw = useMotion === 2;
-      if (plane !== "XY") {
-        warnings.push({
-          line: lineNo,
-          message: `Arc in ${plane} plane not fully supported (treated as XY)`,
-        });
+      let fromA = pos.x, fromB = pos.y, toA = tx, toB = ty;
+      let offA = i, offB = j;
+      if (plane === "XZ") {
+        fromA = pos.x; fromB = pos.z;
+        toA = tx; toB = tz;
+        offA = i; offB = k;
+      } else if (plane === "YZ") {
+        fromA = pos.y; fromB = pos.z;
+        toA = ty; toB = tz;
+        offA = j; offB = k;
       }
+
       const a = arcInfo(
-        { x: pos.x, y: pos.y },
-        { x: tx, y: ty },
-        i !== undefined ? toMm(i) : undefined,
-        j !== undefined ? toMm(j) : undefined,
+        { x: fromA, y: fromB },
+        { x: toA, y: toB },
+        offA !== undefined ? toMm(offA) : undefined,
+        offB !== undefined ? toMm(offB) : undefined,
         r !== undefined ? toMm(r) : undefined,
         cw,
       );
       // Validate radius consistency
-      const rEnd = Math.hypot(tx - a.center.x, ty - a.center.y);
-      if (Math.abs(rEnd - a.radius) > 0.05 && Math.hypot(tx - pos.x, ty - pos.y) > 1e-6) {
+      const rEnd = Math.hypot(toA - a.center.x, toB - a.center.y);
+      if (Math.abs(rEnd - a.radius) > 0.05 && Math.hypot(toA - fromA, toB - fromB) > 1e-6) {
         warnings.push({
           line: lineNo,
           message: `Arc endpoint not on declared radius (Δ=${(rEnd - a.radius).toFixed(3)}mm)`,
@@ -485,16 +514,33 @@ export function sampleMove(move: Move, t: number): Vec3 {
     };
   }
   if (move.type === "arc_cw" || move.type === "arc_ccw") {
-    const ext = move as Move & { sweep?: number; startAngle?: number };
+    const ext = move as Move & { sweep?: number; startAngle?: number; plane?: string };
     const sweep = ext.sweep ?? 0;
     const startAngle = ext.startAngle ?? 0;
+    const plane = ext.plane ?? "XY";
     const cw = move.type === "arc_cw";
     const angle = cw ? startAngle - sweep * t : startAngle + sweep * t;
     const cx = move.center!.x;
     const cy = move.center!.y;
+    const valA = cx + move.radius! * Math.cos(angle);
+    const valB = cy + move.radius! * Math.sin(angle);
+
+    if (plane === "XZ") {
+      return {
+        x: valA,
+        y: move.from.y + (move.to.y - move.from.y) * t,
+        z: valB,
+      };
+    } else if (plane === "YZ") {
+      return {
+        x: move.from.x + (move.to.x - move.from.x) * t,
+        y: valA,
+        z: valB,
+      };
+    }
     return {
-      x: cx + move.radius! * Math.cos(angle),
-      y: cy + move.radius! * Math.sin(angle),
+      x: valA,
+      y: valB,
       z: move.from.z + (move.to.z - move.from.z) * t,
     };
   }

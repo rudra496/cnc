@@ -1746,4 +1746,64 @@ M05                      ; spindle OFF
 M30                      ; program end & rewind
 `,
   },
+  
+  /* ===================================================================== */
+  /* 20) COMPREHENSIVE ARC & DRILL TEST (XZ/YZ planes and G82/G83)        */
+  /* ===================================================================== */
+  {
+    id: "comprehensive-arc-drill",
+    name: "Comprehensive XZ/YZ Arc & Peck Drill",
+    description:
+      "A demonstration of XZ plane (G18) and YZ plane (G19) arcs, along " +
+      "with accurate peck drilling (G83) and dwell (G82) cycles. Shows off " +
+      "the full standard G-code support of the simulator by cutting a semi-" +
+      "cylinder in XZ, another in YZ, and drilling holes with pecks.",
+    difficulty: "Advanced",
+    machine: "Mill",
+    workpiece: { width: 100, depth: 100, height: 20 },
+    code: `
+;
+; ============================================================
+; COMPREHENSIVE ARC & DRILL TEST
+; ============================================================
+; Tool 4: Ball Nose Ø6 for 3D arcs
+; Tool 3: Drill Ø3 for peck drilling
+;
+%
+G21 G90 G17              ; mm, absolute, XY plane default
+T4 M06                   ; load Ball Nose Ø6
+M03 S2500                ; spindle ON
+G00 Z10                  ; safe Z
+
+; --- XZ Plane Arc (G18) ---
+G18                      ; switch to XZ plane (X-horizontal, Z-vertical)
+G00 X-20 Y-10            ; move to start above work
+G01 Z0 F150              ; plunge to surface
+G02 X20 Z0 I20 K0 F200   ; CW arc in XZ plane (radius 20, center at X=0, Z=0)
+G00 Z10                  ; retract
+
+; --- YZ Plane Arc (G19) ---
+G19                      ; switch to YZ plane (Y-horizontal, Z-vertical)
+G00 X0 Y-20              ; move to start
+G01 Z0 F150              ; plunge
+G02 Y20 Z0 J20 K0 F200   ; CW arc in YZ plane (radius 20, center at Y=0, Z=0)
+G00 Z10                  ; retract
+
+; --- Back to XY and Peck Drilling ---
+G17                      ; restore XY plane
+T3 M06                   ; load Drill Ø3
+M03 S3000                ; spindle ON for drill
+G00 X-30 Y-30            ; position for peck drill
+G83 X-30 Y-30 Z-15 R2 Q3 F100 ; Peck drill to Z-15 with 3mm pecks!
+X30 Y30                  ; modal peck drill another hole
+G80                      ; cancel canned cycle
+
+G00 X0 Y0                ; position for spot drill (dwell test)
+G82 X0 Y0 Z-5 R2 P2 F100 ; drill to Z-5, dwell for 2 seconds (P2)
+G80
+G00 Z10
+M05
+M30
+`,
+  },
 ];
