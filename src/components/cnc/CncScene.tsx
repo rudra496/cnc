@@ -349,7 +349,7 @@ function SpindleHead() {
   );
 
   useFrame((_, dt) => {
-    if (bridgeRef.current) bridgeRef.current.position.z = pos.y;
+    if (bridgeRef.current) bridgeRef.current.position.z = -pos.y;
     if (carriageRef.current) carriageRef.current.position.x = pos.x;
     const length = Math.max(4, bridgeY - pos.z - toolLen);
     if (quillRef.current) {
@@ -564,7 +564,7 @@ function ToolMarker() {
   const isCutting = useSimStore((s) => s.isCutting);
   const ref = useRef<THREE.Mesh>(null);
   useFrame(() => {
-    if (ref.current) ref.current.position.set(pos.x, pos.z, pos.y);
+    if (ref.current) ref.current.position.set(pos.x, pos.z, -pos.y);
   });
   return (
     <mesh ref={ref}>

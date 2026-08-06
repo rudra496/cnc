@@ -9,7 +9,6 @@ const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? (repo ? `/${repo}` : "");
 
 const nextConfig: NextConfig = {
   output: "export",
-  serverExternalPackages: ['react-resizable-panels'],
   basePath: basePath || undefined,
   assetPrefix: basePath || undefined,
   transpilePackages: ['lucide-react'],

@@ -30,10 +30,10 @@ export function createTopSurface(width: number, depth: number, N: number): TopSu
     for (let i = 0; i < cols; i++) {
       const idx = j * cols + i;
       const x = -hx + (i / N) * width;
-      const z = -hz + (j / N) * depth;
+      const y = -hz + (j / N) * depth;
       positions[idx * 3] = x;
       positions[idx * 3 + 1] = 0;
-      positions[idx * 3 + 2] = z;
+      positions[idx * 3 + 2] = -y;
       topY[idx] = 0;
     }
   }
@@ -106,8 +106,8 @@ function stampDisc(
   const j0 = Math.max(0, Math.floor((py - radius + hz) / sz));
   const j1 = Math.min(N, Math.ceil((py + radius + hz) / sz));
   for (let j = j0; j <= j1; j++) {
-    const z = -hz + (j / N) * depth;
-    const dz2 = (z - py) * (z - py);
+    const y = -hz + (j / N) * depth;
+    const dz2 = (y - py) * (y - py);
     if (dz2 > r2) continue;
     for (let i = i0; i <= i1; i++) {
       const x = -hx + (i / N) * width;
@@ -188,9 +188,9 @@ export function buildToolpathLines(moves: Move[]): {
 } {
   const feedPoints: THREE.Vector3[] = [];
   const rapidPoints: THREE.Vector3[] = [];
-  // map cnc (x,y,z) -> three (x, z, y)
+  // map cnc (x,y,z) -> three (x, z, -y)
   const toVec = (p: { x: number; y: number; z: number }) =>
-    new THREE.Vector3(p.x, p.z, p.y);
+    new THREE.Vector3(p.x, p.z, -p.y);
   let lastFeed = false;
   for (let i = 0; i < moves.length; i++) {
     const m = moves[i];
