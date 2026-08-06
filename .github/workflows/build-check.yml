@@ -14,7 +14,7 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - run: bun install --frozen-lockfile
+      - run: bun install
       - run: bun run build
         env:
           NEXT_PUBLIC_BASE_PATH: ""
