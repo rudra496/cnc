@@ -2,11 +2,9 @@
 
 import { useEffect } from "react";
 import dynamic from "next/dynamic";
-import {
-  Panel,
-  PanelGroup,
-  PanelResizeHandle,
-} from "react-resizable-panels";
+const Panel = dynamic(() => import("react-resizable-panels").then((mod) => mod.Panel), { ssr: false });
+const PanelGroup = dynamic(() => import("react-resizable-panels").then((mod) => mod.PanelGroup), { ssr: false });
+const PanelResizeHandle = dynamic(() => import("react-resizable-panels").then((mod) => mod.PanelResizeHandle), { ssr: false });
 import { Cpu, GitBranch, BookOpen, Terminal, GraduationCap, Wrench, Layers, Calculator, FolderOpen } from "lucide-react";
 import { useSimStore } from "@/lib/cnc/store";
 import { useViewStore } from "@/lib/cnc/viewStore";
