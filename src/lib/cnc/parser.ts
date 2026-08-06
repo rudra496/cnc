@@ -393,7 +393,8 @@ export function parseGCode(source: string): ParseResult {
       
       if (cannedCycle === 83) {
         // G83 Peck drilling
-        const peck = q !== undefined ? toMm(q) : 5; // Default peck depth if Q is missing
+        let peck = q !== undefined ? toMm(q) : 5; // Default peck depth if Q is missing
+        if (peck <= 0) peck = 5; // Prevent infinite loop if Q is 0 or negative
         let currentZ = rPlane;
         while (currentZ > depth) {
           currentZ -= peck;
