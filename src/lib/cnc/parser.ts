@@ -131,8 +131,6 @@ export function parseGCode(source: string): ParseResult {
   let cannedCycle: number | null = null; // e.g. 81
   let cannedZ: number | null = null; // R plane (retract)
   let cannedDepth: number | null = null;
-  let cannedClear: number | null = null; // G98/G99 retract to
-  let cannedFeed: number | null = null;
   const toMm = (v: number) => (unitsMm ? v : v * 25.4);
 
   const bounds = {
@@ -230,7 +228,6 @@ export function parseGCode(source: string): ParseResult {
     const t = tok.words.find((w) => w.letter === "T")?.value;
     const p = tok.words.find((w) => w.letter === "P")?.value;
     const q = tok.words.find((w) => w.letter === "Q")?.value;
-    const l = tok.words.find((w) => w.letter === "L")?.value;
 
     // Apply F and S words (modal)
     if (f !== undefined) feed = toMm(f);
@@ -278,7 +275,6 @@ export function parseGCode(source: string): ParseResult {
     // Determine motion mode(s) from G words on this line. Some G words are
     // non-motion modal (units, plane, abs/inc, etc.)
     let lineMotion: number | null = null;
-    let dwellTime: number | undefined;
     for (const gw of gWords) {
       const code = Math.round(gw.value);
       switch (code) {
@@ -387,7 +383,6 @@ export function parseGCode(source: string): ParseResult {
       const depth = z !== undefined ? tz : cannedDepth ?? pos.z;
       cannedZ = rPlane;
       cannedDepth = depth;
-      cannedFeed = feed;
       
       // 1) rapid to R plane above the hole
       if (x !== undefined || y !== undefined) {
