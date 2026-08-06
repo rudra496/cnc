@@ -7,7 +7,7 @@ import {
   PanelGroup,
   PanelResizeHandle,
 } from "react-resizable-panels";
-import { Cpu, Github, BookOpen, Terminal, GraduationCap, Wrench, Layers, Calculator, FolderOpen } from "lucide-react";
+import { Cpu, GitBranch, BookOpen, Terminal, GraduationCap, Wrench, Layers, Calculator, FolderOpen } from "lucide-react";
 import { useSimStore } from "@/lib/cnc/store";
 import { useViewStore } from "@/lib/cnc/viewStore";
 import { CNC_EXAMPLES } from "@/lib/cnc/examples";
@@ -101,7 +101,7 @@ export default function Home() {
           rel="noreferrer"
           className="ml-auto flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-slate-400 transition-colors hover:bg-white/10 hover:text-slate-200 lg:ml-2"
         >
-          <Github className="h-3 w-3" /> Docs
+          <GitBranch className="h-3 w-3" /> Docs
         </a>
       </header>
 

@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
   output: "export",
   basePath: basePath || undefined,
   assetPrefix: basePath || undefined,
+  transpilePackages: ['react-resizable-panels', 'lucide-react'],
   images: { unoptimized: true },
   trailingSlash: true,
   typescript: {

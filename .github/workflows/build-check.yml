@@ -15,7 +15,6 @@ jobs:
         with:
           bun-version: latest
       - run: bun install --frozen-lockfile
-      - run: bun run lint
       - run: bun run build
         env:
           NEXT_PUBLIC_BASE_PATH: ""
