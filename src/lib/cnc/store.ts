@@ -158,16 +158,22 @@ function applyProgram(state: SimState, source: string, workpiece: Workpiece): Pa
   } as Partial<SimState>;
 }
 
+const initialWorkpiece: Workpiece = {
+  width: CNC_EXAMPLES[0].workpiece.width,
+  depth: CNC_EXAMPLES[0].workpiece.depth,
+  height: CNC_EXAMPLES[0].workpiece.height,
+};
+
+const initialParsed = parseGCode(CNC_EXAMPLES[0].code);
+const initialCumulative = buildCumulative(initialParsed.moves);
+const initialTel = telemetryAt(initialParsed.moves, 0, 0);
+
 export const useSimStore = create<SimState>((set, get) => ({
   exampleId: CNC_EXAMPLES[0].id,
   source: CNC_EXAMPLES[0].code,
   programName: CNC_EXAMPLES[0].name,
-  parseResult: null,
-  workpiece: {
-    width: CNC_EXAMPLES[0].workpiece.width,
-    depth: CNC_EXAMPLES[0].workpiece.depth,
-    height: CNC_EXAMPLES[0].workpiece.height,
-  },
+  parseResult: initialParsed,
+  workpiece: initialWorkpiece,
   materialId: "aluminum-6061",
   playing: false,
   speed: 1,
@@ -180,20 +186,12 @@ export const useSimStore = create<SimState>((set, get) => ({
   machineMode: "run",
   currentMoveIndex: 0,
   currentT: 0,
-  cumulative: { times: [], cum: [], total: 0 },
-  cycleTimeSec: 0,
+  cumulative: initialCumulative,
+  cycleTimeSec: initialCumulative.total,
   elapsedTimeSec: 0,
-  position: { x: 0, y: 0, z: 0 },
-  spindleRpm: 0,
-  spindleOn: false,
-  spindleDir: 1,
-  feed: 0,
-  tool: 0,
-  coolant: "off",
-  isCutting: false,
-  currentLine: 0,
-  parseErrors: [],
-  parseWarnings: [],
+  ...initialTel,
+  parseErrors: initialParsed.errors,
+  parseWarnings: initialParsed.warnings,
 
   loadExample: (id) => {
     const ex = CNC_EXAMPLES.find((e) => e.id === id) as CncExample;

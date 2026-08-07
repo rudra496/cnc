@@ -11,14 +11,11 @@ const nextConfig: NextConfig = {
   output: "export",
   basePath: basePath || undefined,
   assetPrefix: basePath || undefined,
-  transpilePackages: ['lucide-react'],
+  transpilePackages: ['lucide-react', 'react-resizable-panels'],
   images: { unoptimized: true },
   trailingSlash: true,
   typescript: {
     ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
   },
   reactStrictMode: false,
 };

@@ -48,13 +48,13 @@ export const metadata: Metadata = {
   publisher: "Rudra Sarker",
   category: "education",
   icons: {
-    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    icon: [{ url: `${SITE_URL}/favicon.svg`, type: "image/svg+xml" }],
+    shortcut: `${SITE_URL}/favicon.svg`,
+    apple: `${SITE_URL}/favicon.svg`,
   },
-  manifest: "/site.webmanifest",
+  manifest: `${SITE_URL}/site.webmanifest`,
   alternates: {
-    canonical: "/",
+    canonical: SITE_URL,
   },
   openGraph: {
     title: "CNC Simulator Pro — Free 3D CNC Milling & G-code Simulator",
@@ -66,7 +66,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/og-image.svg",
+        url: `${SITE_URL}/og-image.svg`,
         width: 1280,
         height: 640,
         alt: "CNC Simulator Pro — 3D CNC Milling & G-code Simulator",
@@ -78,7 +78,7 @@ export const metadata: Metadata = {
     title: "CNC Simulator Pro — Free 3D CNC Milling & G-code Simulator",
     description:
       "Watch real material removal in 3D as your G-code runs. Free browser-based CNC simulator — no install needed.",
-    images: ["/og-image.svg"],
+    images: [`${SITE_URL}/og-image.svg`],
     creator: "@rudra496",
   },
   robots: {
