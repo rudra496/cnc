@@ -106,27 +106,41 @@ function stampDisc(
   const isFrontLeft = originDatum === "front_left";
   const hx = isFrontLeft ? 0 : width / 2;
   const hz = isFrontLeft ? 0 : depth / 2;
-  const r2 = radius * radius;
 
   // cell size
   const sx = width / N;
   const sz = depth / N;
+  const edgeMargin = Math.min(sx, sz) * 0.75;
+  const rMax = radius + edgeMargin;
+  const rMax2 = rMax * rMax;
 
-  const i0 = Math.max(0, Math.floor((px - radius + hx) / sx));
-  const i1 = Math.min(N, Math.ceil((px + radius + hx) / sx));
-  const j0 = Math.max(0, Math.floor((py - radius + hz) / sz));
-  const j1 = Math.min(N, Math.ceil((py + radius + hz) / sz));
+  const i0 = Math.max(0, Math.floor((px - rMax + hx) / sx));
+  const i1 = Math.min(N, Math.ceil((px + rMax + hx) / sx));
+  const j0 = Math.max(0, Math.floor((py - rMax + hz) / sz));
+  const j1 = Math.min(N, Math.ceil((py + rMax + hz) / sz));
 
   for (let j = j0; j <= j1; j++) {
     const y = isFrontLeft ? (j / N) * depth : -hz + (j / N) * depth;
-    const dz2 = (y - py) * (y - py);
-    if (dz2 > r2) continue;
+    const dy2 = (y - py) * (y - py);
+    if (dy2 > rMax2) continue;
     for (let i = i0; i <= i1; i++) {
       const x = isFrontLeft ? (i / N) * width : -hx + (i / N) * width;
       const dx2 = (x - px) * (x - px);
-      if (dx2 + dz2 > r2) continue;
+      const d2 = dx2 + dy2;
+      if (d2 > rMax2) continue;
+
+      const dist = Math.sqrt(d2);
+      let cutZ = dz;
+      if (dist > radius) {
+        // smooth edge chamfer anti-aliasing
+        const factor = (dist - radius) / edgeMargin;
+        cutZ = dz * (1 - factor);
+      }
+
       const idx = j * cols + i;
-      if (dz < hm[idx]) hm[idx] = dz;
+      if (cutZ < hm[idx]) {
+        hm[idx] = cutZ;
+      }
     }
   }
 }

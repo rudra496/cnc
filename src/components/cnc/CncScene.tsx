@@ -53,114 +53,7 @@ function useMetal(color: string, rough = 0.35, metal = 0.9) {
   );
 }
 
-// ---------- Workpiece (carved) ----------
-function Workpiece() {
-  const workpiece = useSimStore((s) => s.workpiece);
-  const originDatum = useSimStore((s) => s.originDatum);
-  const parseResult = useSimStore((s) => s.parseResult);
-  const materialId = useSimStore((s) => s.materialId);
-  const machineMode = useSimStore((s) => s.machineMode);
-  const N = 60;
-
-  const top = useMemo<TopSurface>(
-    () => createTopSurface(workpiece.width, workpiece.depth, N, originDatum),
-    [workpiece.width, workpiece.depth, originDatum],
-  );
-
-  const cumulative = useMemo(() => {
-    if (!parseResult || parseResult.moves.length === 0) return null;
-    if (machineMode !== "run") return null;
-    return buildCumulativeHeightmaps(parseResult.moves, workpiece, N, toolRadius, originDatum);
-  }, [parseResult, workpiece, machineMode, originDatum]);
-
-  const liveRef = useRef<Float32Array | null>(null);
-  if (liveRef.current == null) {
-    liveRef.current = new Float32Array((N + 1) * (N + 1));
-  }
-  const lastApplied = useRef<{ idx: number; t: number }>({ idx: -1, t: -1 });
-
-  const currentMoveIndex = useSimStore((s) => s.currentMoveIndex);
-  const currentT = useSimStore((s) => s.currentT);
-
-  useEffect(() => {
-    lastApplied.current = { idx: -1, t: -1 };
-    top.reset();
-  }, [cumulative, top]);
-
-  useFrame(() => {
-    if (!cumulative || !parseResult || parseResult.moves.length === 0) {
-      return;
-    }
-    const idx = currentMoveIndex;
-    const t = currentT;
-    if (
-      lastApplied.current.idx === idx &&
-      Math.abs(lastApplied.current.t - t) < 1e-4
-    ) {
-      return;
-    }
-    lastApplied.current = { idx, t };
-    const base =
-      cumulative[idx] ?? cumulative[cumulative.length - 1];
-    const live = liveRef.current!;
-    const move: Move | undefined = parseResult.moves[idx];
-    applyPartialCut(live, base, move, t, toolRadius, workpiece.width, workpiece.depth, N, originDatum);
-    top.applyHeightmap(live);
-  });
-
-  const bodyGeom = useMemo(
-    () => new THREE.BoxGeometry(workpiece.width, workpiece.height, workpiece.depth),
-    [workpiece.width, workpiece.height, workpiece.depth],
-  );
-
-  const mat = useMemo(() => getMaterialById(materialId), [materialId]);
-
-  const bodyMats = useMemo(() => {
-    const side = new THREE.MeshStandardMaterial({
-      color: mat.sideColor,
-      roughness: 0.45,
-      metalness: 0.7,
-    });
-    const topHidden = new THREE.MeshStandardMaterial({ visible: false });
-    const bottom = new THREE.MeshStandardMaterial({
-      color: mat.sideColor,
-      roughness: 0.6,
-      metalness: 0.6,
-    });
-    return [side, side, topHidden, bottom, side, side]; // px,nx,py,ny,pz,nz
-  }, [mat.sideColor]);
-
-  const topMat = useMemo(
-    () =>
-      new THREE.MeshStandardMaterial({
-        color: mat.color,
-        roughness: 0.35,
-        metalness: 0.85,
-        side: THREE.DoubleSide,
-      }),
-    [mat.color],
-  );
-
-  const bodyPos: [number, number, number] =
-    originDatum === "front_left"
-      ? [workpiece.width / 2, -workpiece.height / 2, -workpiece.depth / 2]
-      : [0, -workpiece.height / 2, 0];
-
-  return (
-    <group>
-      <mesh
-        geometry={bodyGeom}
-        material={bodyMats}
-        position={bodyPos}
-        castShadow
-        receiveShadow
-      >
-        <Edges threshold={5} color="#a0aec0" />
-      </mesh>
-      <mesh geometry={top.geometry} material={topMat} receiveShadow castShadow />
-    </group>
-  );
-}
+// ---------- Tool geometry (renders per tool type) ----------
 
 // ---------- Toolpath lines ----------
 function Toolpath() {
@@ -447,13 +340,123 @@ function SpindleHead() {
   );
 }
 
-// ---------- Machine frame (static) ----------
+// ---------- Workpiece (carved) ----------
+function Workpiece() {
+  const workpiece = useSimStore((s) => s.workpiece);
+  const originDatum = useSimStore((s) => s.originDatum);
+  const parseResult = useSimStore((s) => s.parseResult);
+  const materialId = useSimStore((s) => s.materialId);
+  const machineMode = useSimStore((s) => s.machineMode);
+  const N = 120; // high-resolution smooth surface (120x120 grid)
+
+  const top = useMemo<TopSurface>(
+    () => createTopSurface(workpiece.width, workpiece.depth, N, originDatum),
+    [workpiece.width, workpiece.depth, originDatum],
+  );
+
+  const cumulative = useMemo(() => {
+    if (!parseResult || parseResult.moves.length === 0) return null;
+    if (machineMode !== "run") return null;
+    return buildCumulativeHeightmaps(parseResult.moves, workpiece, N, toolRadius, originDatum);
+  }, [parseResult, workpiece, machineMode, originDatum]);
+
+  const liveRef = useRef<Float32Array | null>(null);
+  if (liveRef.current == null) {
+    liveRef.current = new Float32Array((N + 1) * (N + 1));
+  }
+  const lastApplied = useRef<{ idx: number; t: number }>({ idx: -1, t: -1 });
+
+  const currentMoveIndex = useSimStore((s) => s.currentMoveIndex);
+  const currentT = useSimStore((s) => s.currentT);
+
+  useEffect(() => {
+    lastApplied.current = { idx: -1, t: -1 };
+    top.reset();
+  }, [cumulative, top]);
+
+  useFrame(() => {
+    if (!cumulative || !parseResult || parseResult.moves.length === 0) {
+      return;
+    }
+    const idx = currentMoveIndex;
+    const t = currentT;
+    if (
+      lastApplied.current.idx === idx &&
+      Math.abs(lastApplied.current.t - t) < 1e-4
+    ) {
+      return;
+    }
+    lastApplied.current = { idx, t };
+    const base =
+      cumulative[idx] ?? cumulative[cumulative.length - 1];
+    const live = liveRef.current!;
+    const move: Move | undefined = parseResult.moves[idx];
+    applyPartialCut(live, base, move, t, toolRadius, workpiece.width, workpiece.depth, N, originDatum);
+    top.applyHeightmap(live);
+  });
+
+  const bodyGeom = useMemo(
+    () => new THREE.BoxGeometry(workpiece.width, workpiece.height, workpiece.depth),
+    [workpiece.width, workpiece.height, workpiece.depth],
+  );
+
+  const mat = useMemo(() => getMaterialById(materialId), [materialId]);
+
+  const bodyMats = useMemo(() => {
+    const side = new THREE.MeshStandardMaterial({
+      color: mat.sideColor,
+      roughness: 0.45,
+      metalness: 0.7,
+    });
+    const topHidden = new THREE.MeshStandardMaterial({ visible: false });
+    const bottom = new THREE.MeshStandardMaterial({
+      color: mat.sideColor,
+      roughness: 0.5,
+      metalness: 0.8,
+      side: THREE.DoubleSide,
+    });
+    return [side, side, topHidden, bottom, side, side]; // px,nx,py,ny,pz,nz
+  }, [mat.sideColor]);
+
+  const topMat = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: mat.color,
+        roughness: 0.35,
+        metalness: 0.85,
+        side: THREE.DoubleSide,
+      }),
+    [mat.color],
+  );
+
+  const bodyPos: [number, number, number] =
+    originDatum === "front_left"
+      ? [workpiece.width / 2, -workpiece.height / 2, -workpiece.depth / 2]
+      : [0, -workpiece.height / 2, 0];
+
+  return (
+    <group>
+      <mesh
+        geometry={bodyGeom}
+        material={bodyMats}
+        position={bodyPos}
+        castShadow
+        receiveShadow
+      >
+        <Edges threshold={5} color="#a0aec0" />
+      </mesh>
+      <mesh geometry={top.geometry} material={topMat} receiveShadow castShadow />
+    </group>
+  );
+}
+
+// ---------- Machine frame (100% OPEN VIEW — NO SOLID WALLS) ----------
 function MachineFrame() {
   const workpiece = useSimStore((s) => s.workpiece);
   const originDatum = useSimStore((s) => s.originDatum);
   const showEnclosure = useViewStore((s) => s.showEnclosure);
   const baseMat = useMetal("#2b2f36", 0.55, 0.6);
-  const columnMat = useMetal("#3b4049", 0.5, 0.7);
+  const pillarMat = useMetal("#3b4049", 0.4, 0.8);
   const tableMat = useMetal("#5a6068", 0.5, 0.7);
   const glassMat = useMemo(
     () =>
@@ -464,7 +467,7 @@ function MachineFrame() {
         transmission: 0.95,
         thickness: 0.2,
         transparent: true,
-        opacity: 0.12,
+        opacity: 0.08,
         ior: 1.4,
       }),
     [],
@@ -487,74 +490,72 @@ function MachineFrame() {
   const cx = originDatum === "front_left" ? workpiece.width / 2 : 0;
   const cz = originDatum === "front_left" ? -workpiece.depth / 2 : 0;
 
+  const wOut = Math.max(300, workpiece.width + 120);
+  const dOut = Math.max(260, workpiece.depth + 120);
+
   return (
     <group position={[cx, 0, cz]}>
-      {/* floor base */}
+      {/* open frame base plate */}
       <mesh position={[0, baseTopY - 30, 0]} receiveShadow castShadow>
-        <boxGeometry args={[380, 24, 320]} />
+        <boxGeometry args={[wOut, 20, dOut]} />
         <primitive object={baseMat} attach="material" />
       </mesh>
-      {/* table */}
+      {/* T-slot machining bed table */}
       <mesh position={[0, baseTopY - 6, 0]} receiveShadow castShadow>
-        <boxGeometry args={[Math.max(240, workpiece.width + 80), 14, Math.max(220, workpiece.depth + 80)]} />
+        <boxGeometry args={[Math.max(240, workpiece.width + 60), 12, Math.max(200, workpiece.depth + 60)]} />
         <primitive object={tableMat} attach="material" />
       </mesh>
       {[-90, -45, 0, 45, 90].map((x) => (
-        <mesh key={x} position={[x, baseTopY + 1.5, 0]}>
-          <boxGeometry args={[4, 2, Math.max(214, workpiece.depth + 70)]} />
+        <mesh key={x} position={[x, baseTopY + 1, 0]}>
+          <boxGeometry args={[4, 2, Math.max(194, workpiece.depth + 50)]} />
           <meshStandardMaterial color="#2b2f36" roughness={0.6} metalness={0.5} />
         </mesh>
       ))}
 
-      {/* back column */}
-      <mesh position={[0, 60, -Math.max(160, workpiece.depth / 2 + 80)]} castShadow receiveShadow>
-        <boxGeometry args={[340, 240, 26]} />
-        <primitive object={columnMat} attach="material" />
+      {/* 4 SLIM CORNER STRUCTURAL POSTS (OPEN 360 VIEW) */}
+      {[
+        [-wOut / 2 + 12, -dOut / 2 + 12],
+        [wOut / 2 - 12, -dOut / 2 + 12],
+        [-wOut / 2 + 12, dOut / 2 - 12],
+        [wOut / 2 - 12, dOut / 2 - 12],
+      ].map(([px, pz], idx) => (
+        <mesh key={idx} position={[px, 70, pz]} castShadow receiveShadow>
+          <boxGeometry args={[16, 220, 16]} />
+          <primitive object={pillarMat} attach="material" />
+        </mesh>
+      ))}
+
+      {/* top perimeter structural ring (NO SOLID WALLS) */}
+      <mesh position={[0, 175, -dOut / 2 + 12]} castShadow>
+        <boxGeometry args={[wOut, 16, 16]} />
+        <primitive object={pillarMat} attach="material" />
       </mesh>
-      {/* side columns */}
-      <mesh position={[-Math.max(160, workpiece.width / 2 + 80), 60, 0]} castShadow receiveShadow>
-        <boxGeometry args={[26, 240, 260]} />
-        <primitive object={columnMat} attach="material" />
+      <mesh position={[0, 175, dOut / 2 - 12]} castShadow>
+        <boxGeometry args={[wOut, 16, 16]} />
+        <primitive object={pillarMat} attach="material" />
       </mesh>
-      <mesh position={[Math.max(160, workpiece.width / 2 + 80), 60, 0]} castShadow receiveShadow>
-        <boxGeometry args={[26, 240, 260]} />
-        <primitive object={columnMat} attach="material" />
+      <mesh position={[-wOut / 2 + 12, 175, 0]} castShadow>
+        <boxGeometry args={[16, 16, dOut]} />
+        <primitive object={pillarMat} attach="material" />
       </mesh>
-      {/* top beam */}
-      <mesh position={[0, 175, 0]} castShadow>
-        <boxGeometry args={[340, 26, 260]} />
-        <primitive object={columnMat} attach="material" />
+      <mesh position={[wOut / 2 - 12, 175, 0]} castShadow>
+        <boxGeometry args={[16, 16, dOut]} />
+        <primitive object={pillarMat} attach="material" />
       </mesh>
 
-      {/* linear rail accents */}
-      <mesh position={[0, 70, -148]}>
-        <boxGeometry args={[300, 4, 4]} />
+      {/* linear guide rail accents */}
+      <mesh position={[0, 70, -dOut / 2 + 25]}>
+        <boxGeometry args={[wOut - 40, 4, 4]} />
         <primitive object={accentMat} attach="material" />
       </mesh>
 
-      {/* safety glass (open view toggle) */}
+      {/* optional see-through safety glass panels */}
       {showEnclosure && (
-        <>
-          <mesh position={[0, 80, Math.max(120, workpiece.depth / 2 + 60)]}>
-            <boxGeometry args={[320, 220, 2]} />
-            <primitive object={glassMat} attach="material" />
-          </mesh>
-          <mesh position={[-Math.max(158, workpiece.width / 2 + 75), 80, 0]}>
-            <boxGeometry args={[2, 220, 240]} />
-            <primitive object={glassMat} attach="material" />
-          </mesh>
-          <mesh position={[Math.max(158, workpiece.width / 2 + 75), 80, 0]}>
-            <boxGeometry args={[2, 220, 240]} />
-            <primitive object={glassMat} attach="material" />
-          </mesh>
-        </>
+        <mesh position={[0, 75, dOut / 2 - 6]}>
+          <boxGeometry args={[wOut - 30, 200, 2]} />
+          <primitive object={glassMat} attach="material" />
+        </mesh>
       )}
-
-      {/* brand plate */}
-      <mesh position={[0, 155, -145]}>
-        <boxGeometry args={[140, 26, 2]} />
-        <meshStandardMaterial color="#0f1115" roughness={0.4} metalness={0.6} />
-      </mesh>
     </group>
   );
 }
@@ -601,6 +602,9 @@ function CameraController() {
       case "top":
         pos = [cx, 420, cz + 0.01];
         break;
+      case "bottom":
+        pos = [cx, -350, cz + 0.01];
+        break;
       case "front":
         pos = [cx, 60, cz + 420];
         break;
@@ -633,7 +637,7 @@ function SceneContents() {
 
   return (
     <>
-      <ambientLight intensity={0.5} />
+      <ambientLight intensity={0.65} />
       <directionalLight
         position={[cx + 140, 220, cz + 140]}
         intensity={2.0}
@@ -648,8 +652,10 @@ function SceneContents() {
         shadow-camera-near={1}
         shadow-camera-far={700}
       />
-      <directionalLight position={[cx - 120, 90, cz - 70]} intensity={0.5} color="#9fdcff" />
+      <directionalLight position={[cx - 120, 90, cz - 70]} intensity={0.6} color="#9fdcff" />
       <pointLight position={[cx, 150, cz + 90]} intensity={0.6} color="#fff7ed" />
+      {/* Underside Light for crystal clear bottom inspection */}
+      <pointLight position={[cx, -180, cz]} intensity={1.8} color="#ffffff" />
 
       <Environment resolution={256}>
         <Lightformer intensity={2} position={[cx, 130, cz]} scale={[220, 220, 1]} color="#ffffff" />
@@ -665,7 +671,7 @@ function SceneContents() {
 
       <ContactShadows
         position={[cx, -workpiece.height - 12, cz]}
-        opacity={0.55}
+        opacity={0.4}
         scale={420}
         blur={2.4}
         far={130}
@@ -690,9 +696,10 @@ function SceneContents() {
       <OrbitControls
         makeDefault
         target={[cx, 0, cz]}
-        minDistance={20}
-        maxDistance={800}
-        maxPolarAngle={Math.PI / 2.05}
+        minDistance={10}
+        maxDistance={1000}
+        minPolarAngle={0.01}
+        maxPolarAngle={Math.PI * 0.98}
         enableDamping
         dampingFactor={0.08}
       />
