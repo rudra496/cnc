@@ -450,6 +450,7 @@ function SpindleHead() {
 // ---------- Machine frame (static) ----------
 function MachineFrame() {
   const workpiece = useSimStore((s) => s.workpiece);
+  const originDatum = useSimStore((s) => s.originDatum);
   const showEnclosure = useViewStore((s) => s.showEnclosure);
   const baseMat = useMetal("#2b2f36", 0.55, 0.6);
   const columnMat = useMetal("#3b4049", 0.5, 0.7);
@@ -458,12 +459,12 @@ function MachineFrame() {
     () =>
       new THREE.MeshPhysicalMaterial({
         color: "#9fdcff",
-        roughness: 0.1,
-        metalness: 0,
-        transmission: 0.85,
-        thickness: 0.5,
+        roughness: 0.05,
+        metalness: 0.1,
+        transmission: 0.95,
+        thickness: 0.2,
         transparent: true,
-        opacity: 0.16,
+        opacity: 0.12,
         ior: 1.4,
       }),
     [],
@@ -483,8 +484,11 @@ function MachineFrame() {
   const h = workpiece.height;
   const baseTopY = -h - 18;
 
+  const cx = originDatum === "front_left" ? workpiece.width / 2 : 0;
+  const cz = originDatum === "front_left" ? -workpiece.depth / 2 : 0;
+
   return (
-    <group>
+    <group position={[cx, 0, cz]}>
       {/* floor base */}
       <mesh position={[0, baseTopY - 30, 0]} receiveShadow castShadow>
         <boxGeometry args={[380, 24, 320]} />
@@ -492,63 +496,55 @@ function MachineFrame() {
       </mesh>
       {/* table */}
       <mesh position={[0, baseTopY - 6, 0]} receiveShadow castShadow>
-        <boxGeometry args={[240, 14, 220]} />
+        <boxGeometry args={[Math.max(240, workpiece.width + 80), 14, Math.max(220, workpiece.depth + 80)]} />
         <primitive object={tableMat} attach="material" />
       </mesh>
       {[-90, -45, 0, 45, 90].map((x) => (
         <mesh key={x} position={[x, baseTopY + 1.5, 0]}>
-          <boxGeometry args={[4, 2, 214]} />
+          <boxGeometry args={[4, 2, Math.max(214, workpiece.depth + 70)]} />
           <meshStandardMaterial color="#2b2f36" roughness={0.6} metalness={0.5} />
         </mesh>
       ))}
 
       {/* back column */}
-      <mesh position={[0, 60, -160]} castShadow receiveShadow>
-        <boxGeometry args={[320, 240, 26]} />
+      <mesh position={[0, 60, -Math.max(160, workpiece.depth / 2 + 80)]} castShadow receiveShadow>
+        <boxGeometry args={[340, 240, 26]} />
         <primitive object={columnMat} attach="material" />
       </mesh>
       {/* side columns */}
-      <mesh position={[-160, 60, 0]} castShadow receiveShadow>
-        <boxGeometry args={[26, 240, 240]} />
+      <mesh position={[-Math.max(160, workpiece.width / 2 + 80), 60, 0]} castShadow receiveShadow>
+        <boxGeometry args={[26, 240, 260]} />
         <primitive object={columnMat} attach="material" />
       </mesh>
-      <mesh position={[160, 60, 0]} castShadow receiveShadow>
-        <boxGeometry args={[26, 240, 240]} />
+      <mesh position={[Math.max(160, workpiece.width / 2 + 80), 60, 0]} castShadow receiveShadow>
+        <boxGeometry args={[26, 240, 260]} />
         <primitive object={columnMat} attach="material" />
       </mesh>
       {/* top beam */}
       <mesh position={[0, 175, 0]} castShadow>
-        <boxGeometry args={[320, 26, 240]} />
+        <boxGeometry args={[340, 26, 260]} />
         <primitive object={columnMat} attach="material" />
       </mesh>
 
       {/* linear rail accents */}
       <mesh position={[0, 70, -148]}>
-        <boxGeometry args={[280, 4, 4]} />
-        <primitive object={accentMat} attach="material" />
-      </mesh>
-      <mesh position={[-148, 70, 0]}>
-        <boxGeometry args={[4, 4, 220]} />
-        <primitive object={accentMat} attach="material" />
-      </mesh>
-      <mesh position={[148, 70, 0]}>
-        <boxGeometry args={[4, 4, 220]} />
+        <boxGeometry args={[300, 4, 4]} />
         <primitive object={accentMat} attach="material" />
       </mesh>
 
-      {/* safety glass */}
+      {/* safety glass (open view toggle) */}
       {showEnclosure && (
         <>
-          <mesh position={[0, 80, 120]}>
-            <boxGeometry args={[320, 220, 3]} />
+          <mesh position={[0, 80, Math.max(120, workpiece.depth / 2 + 60)]}>
+            <boxGeometry args={[320, 220, 2]} />
             <primitive object={glassMat} attach="material" />
           </mesh>
-          <mesh position={[-158, 80, 0]}>
-            <boxGeometry args={[3, 220, 240]} />
+          <mesh position={[-Math.max(158, workpiece.width / 2 + 75), 80, 0]}>
+            <boxGeometry args={[2, 220, 240]} />
             <primitive object={glassMat} attach="material" />
           </mesh>
-          <mesh position={[158, 80, 0]}>
-            <boxGeometry args={[3, 220, 240]} />
+          <mesh position={[Math.max(158, workpiece.width / 2 + 75), 80, 0]}>
+            <boxGeometry args={[2, 220, 240]} />
             <primitive object={glassMat} attach="material" />
           </mesh>
         </>

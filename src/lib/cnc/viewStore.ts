@@ -3,7 +3,7 @@
 
 import { create } from "zustand";
 
-export type CameraPreset = "iso" | "top" | "front" | "right" | "reset";
+export type CameraPreset = "iso" | "top" | "bottom" | "front" | "right" | "reset";
 
 export interface ViewState {
   showToolpath: boolean;

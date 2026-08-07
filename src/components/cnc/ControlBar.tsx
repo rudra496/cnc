@@ -22,8 +22,10 @@ import {
   OctagonX,
   PauseCircle,
   Zap,
+  Cpu,
 } from "lucide-react";
 import { useSimStore, selectProgress, type MachineMode } from "@/lib/cnc/store";
+import { MACHINE_CATALOG, type MachineType } from "@/lib/cnc/machines";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -424,8 +426,27 @@ export default function ControlBar() {
 
         <div className="h-px w-full bg-white/10 shrink-0" />
         
-        {/* Machine modes */}
+        {/* Machine Selector & Modes */}
         <div className="flex flex-col gap-2">
+          {/* Machine Architecture Dropdown */}
+          <div className="flex items-center justify-between gap-1.5 rounded-md border border-white/10 bg-black/60 px-2 py-1">
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase text-cyan-400">
+              <Cpu className="h-3.5 w-3.5" />
+              Machine
+            </div>
+            <select
+              value={useSimStore.getState().machineId}
+              onChange={(e) => useSimStore.getState().setMachineId(e.target.value as MachineType)}
+              className="rounded bg-white/5 font-mono text-[10px] font-semibold text-slate-200 px-1 py-0.5 outline-none border border-white/10 cursor-pointer"
+            >
+              {MACHINE_CATALOG.map((m) => (
+                <option key={m.id} value={m.id} className="bg-[#12161f] text-slate-200">
+                  {m.shortName}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="flex items-center justify-between gap-1.5">
             <TButton onClick={toggleOptionalStop} tooltip="Optional stop (M01)" active={optionalStop}>
               <PauseCircle className="h-4 w-4" />

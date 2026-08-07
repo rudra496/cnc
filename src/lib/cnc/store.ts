@@ -5,7 +5,8 @@
 
 import { create } from "zustand";
 import { parseGCode, sampleMove, estimateCycleTime } from "./parser";
-import type { Move, ParseResult, Vec3 } from "./types";
+import type { Move, OriginDatum, ParseResult, Vec3 } from "./types";
+import type { MachineType } from "./machines";
 import { CNC_EXAMPLES, type CncExample } from "./examples";
 
 const RAPID_FEED = 8000; // mm/min used for time estimation of rapids
@@ -50,6 +51,8 @@ export interface SimState {
   parseResult: ParseResult | null;
   workpiece: Workpiece;
   originDatum: OriginDatum; // "front_left" | "center"
+  // machine & environment
+  machineId: MachineType;
   materialId: string;
 
   // playback
@@ -89,6 +92,8 @@ export interface SimState {
   setWorkpiece: (w: Partial<Workpiece>) => void;
   setOriginDatum: (datum: OriginDatum) => void;
   autoFitWorkpiece: () => void;
+  setMachineId: (id: MachineType) => void;
+  setMaterial: (id: string) => void;
   play: () => void;
   pause: () => void;
   toggle: () => void;
@@ -178,6 +183,7 @@ export const useSimStore = create<SimState>((set, get) => ({
   parseResult: initialParsed,
   workpiece: initialWorkpiece,
   originDatum: "center",
+  machineId: "vmc_3axis",
   materialId: "aluminum-6061",
   playing: false,
   speed: 1,
@@ -260,6 +266,10 @@ export const useSimStore = create<SimState>((set, get) => ({
 
   setOriginDatum: (datum) => {
     set({ originDatum: datum });
+  },
+
+  setMachineId: (id) => {
+    set({ machineId: id });
   },
 
   autoFitWorkpiece: () => {
