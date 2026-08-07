@@ -49,6 +49,7 @@ export interface SimState {
   programName: string;
   parseResult: ParseResult | null;
   workpiece: Workpiece;
+  originDatum: OriginDatum; // "front_left" | "center"
   materialId: string;
 
   // playback
@@ -86,6 +87,8 @@ export interface SimState {
   loadExample: (id: string) => void;
   setSource: (code: string, opts?: { keepPlay?: boolean }) => void;
   setWorkpiece: (w: Partial<Workpiece>) => void;
+  setOriginDatum: (datum: OriginDatum) => void;
+  autoFitWorkpiece: () => void;
   play: () => void;
   pause: () => void;
   toggle: () => void;
@@ -174,6 +177,7 @@ export const useSimStore = create<SimState>((set, get) => ({
   programName: CNC_EXAMPLES[0].name,
   parseResult: initialParsed,
   workpiece: initialWorkpiece,
+  originDatum: "center",
   materialId: "aluminum-6061",
   playing: false,
   speed: 1,
@@ -202,10 +206,20 @@ export const useSimStore = create<SimState>((set, get) => ({
       depth: ex.workpiece.depth,
       height: ex.workpiece.height,
     });
+    // Auto-detect origin datum: if coordinates are mostly positive, default to front_left
+    const parseRes = patch.parseResult as ParseResult | undefined;
+    let datum: OriginDatum = "center";
+    if (parseRes && parseRes.bounds) {
+      const { minX, minY } = parseRes.bounds;
+      if (minX >= -5 && minY >= -5) {
+        datum = "front_left";
+      }
+    }
     set({
       exampleId: id,
       programName: ex.name,
       playing: false,
+      originDatum: datum,
       ...patch,
     } as Partial<SimState>);
   },
@@ -213,10 +227,27 @@ export const useSimStore = create<SimState>((set, get) => ({
   setSource: (code, opts) => {
     const base = get() as SimState;
     const patch = applyProgram(base, code, base.workpiece);
+    const parseRes = patch.parseResult as ParseResult | undefined;
+    let datum: OriginDatum = base.originDatum;
+    let newWorkpiece = base.workpiece;
+    if (parseRes && parseRes.bounds) {
+      const { minX, maxX, minY, maxY, minZ } = parseRes.bounds;
+      // Auto-detect front_left if minX/minY are non-negative
+      if (minX >= -5 && minY >= -5) {
+        datum = "front_left";
+        newWorkpiece = {
+          width: Math.max(100, Math.ceil(maxX + 25)),
+          depth: Math.max(100, Math.ceil(maxY + 25)),
+          height: Math.max(20, Math.ceil(Math.abs(Math.min(0, minZ)) + 10)),
+        };
+      }
+    }
     set({
       exampleId: null,
       programName: "Custom Program",
       playing: opts?.keepPlay ? base.playing : false,
+      originDatum: datum,
+      workpiece: newWorkpiece,
       ...patch,
     } as Partial<SimState>);
   },
@@ -225,6 +256,33 @@ export const useSimStore = create<SimState>((set, get) => ({
     const base = get() as SimState;
     const workpiece = { ...base.workpiece, ...w };
     set({ workpiece });
+  },
+
+  setOriginDatum: (datum) => {
+    set({ originDatum: datum });
+  },
+
+  autoFitWorkpiece: () => {
+    const s = get() as SimState;
+    if (!s.parseResult || s.parseResult.moves.length === 0) return;
+    const { minX, maxX, minY, maxY, minZ } = s.parseResult.bounds;
+    const depthCut = Math.abs(Math.min(0, minZ));
+    const isFL = s.originDatum === "front_left";
+
+    let newW: number;
+    let newD: number;
+    let newH = Math.max(20, Math.ceil(depthCut + 10));
+
+    if (isFL) {
+      newW = Math.max(80, Math.ceil(Math.max(maxX + 25, maxX - minX + 30)));
+      newD = Math.max(80, Math.ceil(Math.max(maxY + 25, maxY - minY + 30)));
+    } else {
+      const maxAbsX = Math.max(Math.abs(minX), Math.abs(maxX));
+      const maxAbsY = Math.max(Math.abs(minY), Math.abs(maxY));
+      newW = Math.max(80, Math.ceil(maxAbsX * 2 + 30));
+      newD = Math.max(80, Math.ceil(maxAbsY * 2 + 30));
+    }
+    set({ workpiece: { width: newW, depth: newD, height: newH } });
   },
 
   play: () => {

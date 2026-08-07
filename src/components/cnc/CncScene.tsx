@@ -56,22 +56,22 @@ function useMetal(color: string, rough = 0.35, metal = 0.9) {
 // ---------- Workpiece (carved) ----------
 function Workpiece() {
   const workpiece = useSimStore((s) => s.workpiece);
+  const originDatum = useSimStore((s) => s.originDatum);
   const parseResult = useSimStore((s) => s.parseResult);
   const materialId = useSimStore((s) => s.materialId);
   const machineMode = useSimStore((s) => s.machineMode);
   const N = 60;
 
   const top = useMemo<TopSurface>(
-    () => createTopSurface(workpiece.width, workpiece.depth, N),
-    [workpiece.width, workpiece.depth],
+    () => createTopSurface(workpiece.width, workpiece.depth, N, originDatum),
+    [workpiece.width, workpiece.depth, originDatum],
   );
 
   const cumulative = useMemo(() => {
     if (!parseResult || parseResult.moves.length === 0) return null;
-    // dry_run / machine_lock: no carving (build empty cumulative)
     if (machineMode !== "run") return null;
-    return buildCumulativeHeightmaps(parseResult.moves, workpiece, N, toolRadius);
-  }, [parseResult, workpiece, machineMode]);
+    return buildCumulativeHeightmaps(parseResult.moves, workpiece, N, toolRadius, originDatum);
+  }, [parseResult, workpiece, machineMode, originDatum]);
 
   const liveRef = useRef<Float32Array | null>(null);
   if (liveRef.current == null) {
@@ -104,7 +104,7 @@ function Workpiece() {
       cumulative[idx] ?? cumulative[cumulative.length - 1];
     const live = liveRef.current!;
     const move: Move | undefined = parseResult.moves[idx];
-    applyPartialCut(live, base, move, t, toolRadius, workpiece.width, workpiece.depth, N);
+    applyPartialCut(live, base, move, t, toolRadius, workpiece.width, workpiece.depth, N, originDatum);
     top.applyHeightmap(live);
   });
 
@@ -141,12 +141,17 @@ function Workpiece() {
     [mat.color],
   );
 
+  const bodyPos: [number, number, number] =
+    originDatum === "front_left"
+      ? [workpiece.width / 2, -workpiece.height / 2, -workpiece.depth / 2]
+      : [0, -workpiece.height / 2, 0];
+
   return (
     <group>
       <mesh
         geometry={bodyGeom}
         material={bodyMats}
-        position={[0, -workpiece.height / 2, 0]}
+        position={bodyPos}
         castShadow
         receiveShadow
       >
@@ -584,51 +589,57 @@ function CameraController() {
   const preset = useViewStore((s) => s.cameraPreset);
   const nonce = useViewStore((s) => s.cameraNonce);
   const target = useSimStore((s) => s.workpiece);
+  const originDatum = useSimStore((s) => s.originDatum);
+
+  const cx = originDatum === "front_left" ? target.width / 2 : 0;
+  const cz = originDatum === "front_left" ? -target.depth / 2 : 0;
 
   useEffect(() => {
     if (!preset) return;
     const cam = camera as THREE.PerspectiveCamera;
-    const dist = 320;
-    let pos: [number, number, number] = [230, 190, 250];
+    let pos: [number, number, number] = [cx + 230, 190, cz + 250];
     switch (preset) {
       case "iso":
-        pos = [230, 190, 250];
+        pos = [cx + 230, 190, cz + 250];
         break;
       case "top":
-        pos = [0, 420, 0.01];
+        pos = [cx, 420, cz + 0.01];
         break;
       case "front":
-        pos = [0, 60, 420];
+        pos = [cx, 60, cz + 420];
         break;
       case "right":
-        pos = [420, 60, 0];
+        pos = [cx + 420, 60, cz];
         break;
       case "reset":
-        pos = [230, 190, 250];
+        pos = [cx + 230, 190, cz + 250];
         break;
     }
-    void dist;
     cam.position.set(pos[0], pos[1], pos[2]);
-    cam.lookAt(0, 0, 0);
+    cam.lookAt(cx, 0, cz);
     if (controls) {
-      controls.target.set(0, 0, 0);
+      controls.target.set(cx, 0, cz);
       controls.update();
     }
-  }, [preset, nonce]);
+  }, [preset, nonce, cx, cz]);
 
-  void target;
   return null;
 }
 
 // ---------- scene ----------
 function SceneContents() {
   const workpiece = useSimStore((s) => s.workpiece);
+  const originDatum = useSimStore((s) => s.originDatum);
   const showGrid = useViewStore((s) => s.showGrid);
+
+  const cx = originDatum === "front_left" ? workpiece.width / 2 : 0;
+  const cz = originDatum === "front_left" ? -workpiece.depth / 2 : 0;
+
   return (
     <>
       <ambientLight intensity={0.5} />
       <directionalLight
-        position={[140, 220, 140]}
+        position={[cx + 140, 220, cz + 140]}
         intensity={2.0}
         castShadow
         shadow-bias={-0.0005}
@@ -641,13 +652,13 @@ function SceneContents() {
         shadow-camera-near={1}
         shadow-camera-far={700}
       />
-      <directionalLight position={[-120, 90, -70]} intensity={0.5} color="#9fdcff" />
-      <pointLight position={[0, 150, 90]} intensity={0.6} color="#fff7ed" />
+      <directionalLight position={[cx - 120, 90, cz - 70]} intensity={0.5} color="#9fdcff" />
+      <pointLight position={[cx, 150, cz + 90]} intensity={0.6} color="#fff7ed" />
 
       <Environment resolution={256}>
-        <Lightformer intensity={2} position={[0, 130, 0]} scale={[220, 220, 1]} color="#ffffff" />
-        <Lightformer intensity={1.2} position={[-130, 70, 90]} scale={[80, 130, 1]} color="#bcd4ff" />
-        <Lightformer intensity={1.2} position={[130, 70, -90]} scale={[80, 130, 1]} color="#ffd9b3" />
+        <Lightformer intensity={2} position={[cx, 130, cz]} scale={[220, 220, 1]} color="#ffffff" />
+        <Lightformer intensity={1.2} position={[cx - 130, 70, cz + 90]} scale={[80, 130, 1]} color="#bcd4ff" />
+        <Lightformer intensity={1.2} position={[cx + 130, 70, cz - 90]} scale={[80, 130, 1]} color="#ffd9b3" />
       </Environment>
 
       <MachineFrame />
@@ -657,7 +668,7 @@ function SceneContents() {
       <ToolMarker />
 
       <ContactShadows
-        position={[0, -workpiece.height - 12, 0]}
+        position={[cx, -workpiece.height - 12, cz]}
         opacity={0.55}
         scale={420}
         blur={2.4}
@@ -666,7 +677,7 @@ function SceneContents() {
       />
 
       <Grid
-        position={[0, -workpiece.height - 12.5, 0]}
+        position={[cx, -workpiece.height - 12.5, cz]}
         args={[700, 700]}
         cellSize={10}
         cellThickness={0.6}
@@ -682,7 +693,7 @@ function SceneContents() {
 
       <OrbitControls
         makeDefault
-        target={[0, 0, 0]}
+        target={[cx, 0, cz]}
         minDistance={20}
         maxDistance={800}
         maxPolarAngle={Math.PI / 2.05}

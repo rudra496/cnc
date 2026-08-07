@@ -61,6 +61,8 @@ export interface ParseError {
   message: string;
 }
 
+export type OriginDatum = "front_left" | "center";
+
 export interface ParseResult {
   ok: boolean;
   moves: Move[];

@@ -284,6 +284,7 @@ export function parseGCode(source: string): ParseResult {
         case 3:
           lineMotion = code;
           motion = code;
+          cannedCycle = null;
           break;
         case 4:
           lineMotion = 4;

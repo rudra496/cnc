@@ -48,6 +48,32 @@ export interface CncExample {
 }
 
 export const CNC_EXAMPLES: CncExample[] = [
+  {
+    id: "5-hole-drilling",
+    name: "5-Hole Drilling Pattern (G81)",
+    description:
+      "A 5-hole drilling pattern using G81 canned cycles, safe Z retracts, and Front-Left (G54) workpiece origin.",
+    difficulty: "Beginner",
+    machine: "Mill",
+    workpiece: { width: 150, depth: 125, height: 20 },
+    code: `
+%
+N0010 G21 G90 T1 M06 (Metric units, Absolute pos, Tool 1, Tool change)
+N0020 G00 X0 Y0 Z12.0 (Rapid move to origin safe height)
+N0030 G00 X25 Y25 Z12.0 (Rapid move to 1st hole position)
+N0040 G81 Z-10.0 S592 F100 M03 (Drilling cycle, Z depth -10mm, Spindle ON)
+N0050 G00 X25 Y100 Z12.0 (Move to 2nd hole position)
+N0060 G81 Z-10.0 S592 F100 M03 (Drill 2nd hole)
+N0070 G00 X50 Y62.5 Z12.0 (Move to 3rd hole position)
+N0080 G81 Z-10.0 S592 F100 M03 (Drill 3rd hole)
+N0090 G00 X125 Y25 Z12.0 (Move to 4th hole position)
+N0100 G81 Z-10.0 S592 F100 M03 (Drill 4th hole)
+N0110 G00 X125 Y100 Z12.0 (Move to 5th hole position)
+N0120 G81 Z-10.0 S592 F100 M03 (Drill 5th hole)
+N0130 G00 X0 Y0 Z12.0 M30 (Return to home, End Program)
+%
+`,
+  },
   /* ===================================================================== */
   /* 1) CIRCLE POCKET / BORE                                                */
   /* ===================================================================== */

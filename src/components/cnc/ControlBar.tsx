@@ -21,6 +21,7 @@ import {
   Lock,
   OctagonX,
   PauseCircle,
+  Zap,
 } from "lucide-react";
 import { useSimStore, selectProgress, type MachineMode } from "@/lib/cnc/store";
 import { Button } from "@/components/ui/button";
@@ -509,11 +510,76 @@ export default function ControlBar() {
 
         <div className="h-px w-full bg-white/10 shrink-0" />
 
-        {/* Overrides */}
-        <div className="flex flex-col gap-3 shrink-0">
-          <OverrideKnob label="Feed" value={feedOverride} onChange={setFeedOverride} min={0} max={200} color="#22d3ee" />
-          <OverrideKnob label="Rapid" value={rapidOverride} onChange={setRapidOverride} min={10} max={100} color="#f59e0b" />
-          <OverrideKnob label="Spindle" value={spindleOverride} onChange={setSpindleOverride} min={50} max={200} color="#fb7185" />
+        {/* Workpiece Setup */}
+        <div className="flex flex-col gap-2 shrink-0 rounded-md border border-white/10 bg-black/40 p-2">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+              Workpiece Setup
+            </span>
+            <button
+              onClick={useSimStore.getState().autoFitWorkpiece}
+              className="flex items-center gap-1 rounded bg-cyan-500/20 px-1.5 py-0.5 text-[9px] font-semibold text-cyan-300 hover:bg-cyan-500/30 transition-colors"
+            >
+              <Zap className="h-2.5 w-2.5" /> Auto-Fit
+            </button>
+          </div>
+          
+          {/* Origin Datum selector */}
+          <div className="flex items-center gap-1 bg-black/60 p-0.5 rounded border border-white/5">
+            <button
+              onClick={() => useSimStore.getState().setOriginDatum("front_left")}
+              className={cn(
+                "flex-1 rounded py-0.5 text-[9px] font-mono font-semibold transition-colors",
+                useSimStore.getState().originDatum === "front_left"
+                  ? "bg-cyan-500/25 text-cyan-200"
+                  : "text-slate-500 hover:text-slate-300"
+              )}
+            >
+              Front-Left (G54)
+            </button>
+            <button
+              onClick={() => useSimStore.getState().setOriginDatum("center")}
+              className={cn(
+                "flex-1 rounded py-0.5 text-[9px] font-mono font-semibold transition-colors",
+                useSimStore.getState().originDatum === "center"
+                  ? "bg-cyan-500/25 text-cyan-200"
+                  : "text-slate-500 hover:text-slate-300"
+              )}
+            >
+              Center
+            </button>
+          </div>
+
+          {/* Dimensions (W x D x H) */}
+          <div className="grid grid-cols-3 gap-1">
+            <div className="flex flex-col">
+              <span className="text-[8px] text-slate-500">X (Width)</span>
+              <input
+                type="number"
+                value={useSimStore.getState().workpiece.width}
+                onChange={(e) => useSimStore.getState().setWorkpiece({ width: Math.max(10, Number(e.target.value)) })}
+                className="w-full rounded border border-white/10 bg-black/60 px-1 py-0.5 font-mono text-[10px] text-slate-200"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[8px] text-slate-500">Y (Depth)</span>
+              <input
+                type="number"
+                value={useSimStore.getState().workpiece.depth}
+                onChange={(e) => useSimStore.getState().setWorkpiece({ depth: Math.max(10, Number(e.target.value)) })}
+                className="w-full rounded border border-white/10 bg-black/60 px-1 py-0.5 font-mono text-[10px] text-slate-200"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[8px] text-slate-500">Z (Height)</span>
+              <input
+                type="number"
+                value={useSimStore.getState().workpiece.height}
+                onChange={(e) => useSimStore.getState().setWorkpiece({ height: Math.max(5, Number(e.target.value)) })}
+                className="w-full rounded border border-white/10 bg-black/60 px-1 py-0.5 font-mono text-[10px] text-slate-200"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="mt-auto flex flex-col gap-1.5 rounded-md border border-white/10 bg-black/50 px-2.5 py-1.5 shrink-0">

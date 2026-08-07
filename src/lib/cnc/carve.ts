@@ -4,7 +4,7 @@
 
 import * as THREE from "three";
 import { sampleMove } from "./parser";
-import type { Move } from "./types";
+import type { Move, OriginDatum } from "./types";
 import type { Workpiece } from "./store";
 import { toolRadius } from "./tools";
 
@@ -18,19 +18,26 @@ export interface TopSurface {
   reset: () => void;
 }
 
-export function createTopSurface(width: number, depth: number, N: number): TopSurface {
+export function createTopSurface(
+  width: number,
+  depth: number,
+  N: number,
+  originDatum: OriginDatum = "front_left",
+): TopSurface {
   const cols = N + 1;
   const count = cols * cols;
   const positions = new Float32Array(count * 3);
   const topY = new Float32Array(count);
 
-  const hx = width / 2;
-  const hz = depth / 2;
+  const isFrontLeft = originDatum === "front_left";
+  const hx = isFrontLeft ? 0 : width / 2;
+  const hz = isFrontLeft ? 0 : depth / 2;
+
   for (let j = 0; j < cols; j++) {
     for (let i = 0; i < cols; i++) {
       const idx = j * cols + i;
-      const x = -hx + (i / N) * width;
-      const y = -hz + (j / N) * depth;
+      const x = isFrontLeft ? (i / N) * width : -hx + (i / N) * width;
+      const y = isFrontLeft ? (j / N) * depth : -hz + (j / N) * depth;
       positions[idx * 3] = x;
       positions[idx * 3 + 1] = 0;
       positions[idx * 3 + 2] = -y;
@@ -92,25 +99,30 @@ function stampDisc(
   py: number,
   radius: number,
   dz: number,
+  originDatum: OriginDatum = "front_left",
 ) {
   if (dz >= 0) return; // only cut when tool is below surface
   const cols = N + 1;
-  const hx = width / 2;
-  const hz = depth / 2;
+  const isFrontLeft = originDatum === "front_left";
+  const hx = isFrontLeft ? 0 : width / 2;
+  const hz = isFrontLeft ? 0 : depth / 2;
   const r2 = radius * radius;
+
   // cell size
   const sx = width / N;
   const sz = depth / N;
+
   const i0 = Math.max(0, Math.floor((px - radius + hx) / sx));
   const i1 = Math.min(N, Math.ceil((px + radius + hx) / sx));
   const j0 = Math.max(0, Math.floor((py - radius + hz) / sz));
   const j1 = Math.min(N, Math.ceil((py + radius + hz) / sz));
+
   for (let j = j0; j <= j1; j++) {
-    const y = -hz + (j / N) * depth;
+    const y = isFrontLeft ? (j / N) * depth : -hz + (j / N) * depth;
     const dz2 = (y - py) * (y - py);
     if (dz2 > r2) continue;
     for (let i = i0; i <= i1; i++) {
-      const x = -hx + (i / N) * width;
+      const x = isFrontLeft ? (i / N) * width : -hx + (i / N) * width;
       const dx2 = (x - px) * (x - px);
       if (dx2 + dz2 > r2) continue;
       const idx = j * cols + i;
@@ -128,10 +140,9 @@ export function stampMove(
   width: number,
   depth: number,
   N: number,
+  originDatum: OriginDatum = "front_left",
 ) {
   if (move.type === "dwell" || move.type === "rapid") {
-    // rapids shouldn't cut (assume safe retract). If a rapid dips below 0 we
-    // still skip to avoid weird gouges — real machine would crash.
     return;
   }
   if (tMax <= 0) return;
@@ -140,7 +151,7 @@ export function stampMove(
   for (let s = 0; s <= samples; s++) {
     const t = (s / samples) * tMax;
     const p = sampleMove(move, t);
-    stampDisc(hm, N, width, depth, p.x, p.y, tr, p.z);
+    stampDisc(hm, N, width, depth, p.x, p.y, tr, p.z, originDatum);
   }
 }
 
@@ -151,6 +162,7 @@ export function buildCumulativeHeightmaps(
   workpiece: Workpiece,
   N: number,
   trFn: ToolRadiusFn = toolRadius,
+  originDatum: OriginDatum = "front_left",
 ): Float32Array[] {
   const cols = N + 1;
   const count = cols * cols;
@@ -158,7 +170,7 @@ export function buildCumulativeHeightmaps(
   const current = new Float32Array(count); // all zeros
   result.push(new Float32Array(current));
   for (const m of moves) {
-    stampMove(current, m, 1, trFn(m.tool), workpiece.width, workpiece.depth, N);
+    stampMove(current, m, 1, trFn(m.tool), workpiece.width, workpiece.depth, N, originDatum);
     result.push(new Float32Array(current));
   }
   return result;
@@ -174,10 +186,11 @@ export function applyPartialCut(
   width: number,
   depth: number,
   N: number,
+  originDatum: OriginDatum = "front_left",
 ) {
   target.set(base);
   if (move) {
-    stampMove(target, move, t, trFn(move.tool), width, depth, N);
+    stampMove(target, move, t, trFn(move.tool), width, depth, N, originDatum);
   }
 }
 
