@@ -138,6 +138,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <script defer src="https://analytics.129-159-229-170.sslip.io/script.js" data-website-id="c6afed27-497e-4542-8774-d9aec3c11b61"></script>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
