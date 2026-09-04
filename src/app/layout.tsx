@@ -18,7 +18,10 @@ const SITE_URL = "https://rudra496.github.io/cnc";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: {
+  verification: {
+    google: "NE4MzR6NIdQYAoPS52dBxjRxvB8TWUTt4aGM2Uachik",
+  },
+    title: {
     default: "CNC Simulator Pro — Free 3D CNC Milling & G-code Simulator",
     template: "%s · CNC Simulator Pro",
   },
